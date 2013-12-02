@@ -3,7 +3,9 @@ import numpy
 from PIL import Image
 import math
 import json
+import logging
 
+logger = logging.getLogger(__name__)
 
 fast_sum = numpy.add.reduce
 
@@ -268,6 +270,11 @@ def split_characters(image):
             yield c
 
 
+def remove_subpixel_aa(image):
+    image = image.repeat(3, 0)
+    return image.reshape((image.shape[0], -1))
+
+
 def process(image):
     return (numpy.abs(image[:, :, 1].astype(numpy.int16) -
             image[:, 0:1, 1]).astype(numpy.uint8))
@@ -409,13 +416,40 @@ class Classifier(object):
             print()
 
 
-def min_path(arr, val_mult=1000, base_cost=10):
-    h, w = arr.shape
-    result = numpy.zeros(arr.shape, numpy.uint64)
-    src = (arr.astype(numpy.uint64) * val_mult)
-    for y in range(1, h):
-        for x in range(w):
-            result[y, x] = (
-                src[y, x] + result[y - 1, max(0, x-1): x+1].min() + base_cost
-            )
-    return result
+def bin_find_span(bin):
+    a = numpy.where(bin)[0]
+    return a.min(), a.max()
+
+
+def _create_spans_and_masks(labels, num_labels):
+    if num_labels < 1:
+        return
+    masks = [binary_dilation(labels==i) for i in range(1, num_labels+1)]
+    spans = [bin_find_span(m.sum(0) > 0) for m in masks]
+    sorted_spans_and_masks = sorted(zip(spans, masks), key=lambda x: (x[0][0], -x[0][1]))
+    current_span, current_mask = sorted_spans_and_masks[0]
+    for span, mask in sorted_spans_and_masks[1:]:
+        if span[0] >= current_span[0] and span[1] <= current_span[1]:
+            current_mask |= mask
+        else:
+            yield current_span, current_mask[:, current_span[0]:current_span[1]]
+            current_span, current_mask = span, mask
+    yield current_span, current_mask[:, current_span[0]:current_span[1]]
+
+
+def character_seg_max_vertical_sum(grey_scale_image, fraction=0.05):
+    for x1, x2 in max_vertical_density_threshold_character_segmentation(
+        grey_scale_image,
+        fraction
+    ):
+        yield grey_scale_image[:, x1:x2]
+
+
+def character_seg_erosion(grey_scale_image):
+    bin_img = grey_scale_image > 0
+    labels, num_labels = label(binary_erosion(bin_img > 0))
+    for span, mask in _create_spans_and_masks(labels, num_labels):
+        char_img = grey_scale_image[:, span[0]:span[1]].copy()
+        char_img[mask == False] = 0
+        yield char_img
+

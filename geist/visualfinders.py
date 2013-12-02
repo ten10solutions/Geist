@@ -1,14 +1,41 @@
 from __future__ import division, absolute_import, print_function
 
 from .core import Location
-from .vision import best_convolution, grey_scale, edge_enhance
+from .vision import best_convolution, grey_scale, find_edges
 from .colour import rgb_to_hsv
+from .ocr import Classifier
 import numpy
 from itertools import chain
 from scipy.ndimage.measurements import (
     label,
     find_objects,
 )
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+class TextFinderFilter(object):
+    def __init__(self, classifier, finder, text):
+        self.classifier = classifier
+        self.text = text
+        self.finder = finder
+
+    def find(self, gui):
+        image = gui.capture()
+        for loc in self.finder.find(gui):
+            sub_image = image[loc.y:loc.y + loc.h, loc.x:loc.x + loc.w]
+            text = self.classifier.classify(sub_image)
+            if text.replace('?','') == self.text:
+                yield loc
+
+
+def text_finder_filter_from_path(path):
+    classifier = Classifier()
+    with open(path) as f:
+        classifier.from_json(f.read())
+    return lambda finder, text: TextFinderFilter(classifier, finder, text)
+
 
 class ApproxTemplateFinder(object):
     def __init__(self, template):
@@ -19,8 +46,8 @@ class ApproxTemplateFinder(object):
         image = gui.capture()
         gimage = grey_scale(image)
         gtemplate = grey_scale(self.template)
-        edge_image = edge_enhance(gimage)
-        edge_template = edge_enhance(gtemplate)
+        edge_image = find_edges(gimage)
+        edge_template = find_edges(gtemplate)
         bin_image = edge_image > 10
         bin_template = edge_template > 10
         for x, y in best_convolution(bin_template, bin_image):
@@ -57,8 +84,8 @@ class ThresholdTemplateFinder(object):
         gtemplate = grey_scale(self.template)
         threshold_image = gimage > self.threshold
         threshold_template = gtemplate > self.threshold
-        edge_image = edge_enhance(threshold_image)
-        edge_template = edge_enhance(threshold_template)
+        edge_image = find_edges(threshold_image)
+        edge_template = find_edges(threshold_template)
         bin_image = edge_image > 0
         bin_template = edge_template > 0
         for x, y in best_convolution(bin_template, bin_image):

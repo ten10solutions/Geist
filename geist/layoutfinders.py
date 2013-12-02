@@ -1,5 +1,6 @@
 from __future__ import division, absolute_import, print_function
 from .core import Location
+from itertools import groupby
 
 
 class LocationOperatorFinder(object):
@@ -16,86 +17,150 @@ class LocationOperatorFinder(object):
                     yield b_location
                     break
 
-
-class LocationOperatorFinderBuilder(object):
-    def __init__(self, operation):
-        self.operation = operation
-
-    def __and__(self, other):
-        return LocationOperatorFinderBuilder(
-            lambda a, b: self.operation(a, b) and other.operation(a, b)
+    def __repr__(self):
+        return "A=%r, B=%r: %r" % (
+            self._a_finder,
+            self._b_finder,
+            self._operator
         )
+
+
+class Operation(object):
+    def __and__(self, other):
+        return _and(self, other)
 
     def __or__(self, other):
-        return LocationOperatorFinderBuilder(
-            lambda a, b: self.operation(a, b) or other.operation(a, b)
-        )
-
-    def __call__(self, a_finder, b_finder):
-        return LocationOperatorFinder(self.operation, a_finder, b_finder)
+        return _or(self, other)
 
 
-
-def below_op(a, b):
-    return b.y >= (a.y + a.h)
-
-
-def above_op(a, b):
-    return b.y + b.h <= a.y
-
-
-def left_of_op(a, b):
-    return b.x + b.w >= a.x
-
-
-def right_of_op(a, b):
-    return b.x <= (a.x + a.w)
-
-
-def row_aligned_op(a, b):
-    return a.y <= b.center[1] <= (a.y + a.h)
-
-
-def column_aligned_op(a, b):
-    return a.x <= b.center[0] <= (a.x + a.w)
-
-
-class MaxDistanceOp(object):
-    def __init__(self, max_distance):
-        self.max_distance = max_distance
+class _and(Operation):
+    def __init__(self, a_op, b_op):
+        self.a_op, self.b_op = a_op, b_op
 
     def __call__(self, a, b):
-        x1, y1 = a.center
-        x2, y2 = b.center
-        return (((x1 - x2) ** 2) + ((y1 - y2) ** 2)) ** 0.5 <= self.max_distance
+        return self.a_op(a, b) and self.b_op(a, b)
+
+    def __repr__(self):
+        return "(%r and %r)" % (self.a_op, self.b_op)
 
 
-def intersects_op(a, b):
-    return not (
-        (b.x > (a.x + a.w)) |
-        (b.x + b.w < a.x) |
-        (b.y > (a.y + a.h)) |
-        (b.y + b.h < a.y)
-    )
+class _or(Operation):
+    def __init__(self, a_op, b_op):
+        self.a_op, self.b_op = a_op, b_op
+
+    def __call__(self, a, b):
+        return self.a_op(a, b) or self.b_op(a, b)
+
+    def __repr__(self):
+        return "(%r or %r)" % (self.a_op, self.b_op)
+
+class _SimpleOperation(Operation):
+    def __init__(self, op_func, doc):
+        self.op_func, self.doc = op_func, doc
+
+    def __call__(self, a, b):
+        return self.op_func(a, b)
+
+    def __repr__(self):
+        return self.doc
+
+below = _SimpleOperation(
+    lambda a, b: b.y + b.h <= a.y,
+    "A is below all of B vertically"
+)
+above = _SimpleOperation(
+    lambda a, b: b.y >= (a.y + a.h),
+    "A is above all of B vertically"
+)
+left_of = _SimpleOperation(
+    lambda a, b: b.x + b.w >= a.x,
+    "A is left of B"
+)
+right_of = _SimpleOperation(
+    lambda a, b: b.x <= (a.x + a.w),
+    "A is right of B"
+)
 
 
-below = LocationOperatorFinderBuilder(below_op)
-above = LocationOperatorFinderBuilder(above_op)
-left_of = LocationOperatorFinderBuilder(left_of_op)
-right_of = LocationOperatorFinderBuilder(right_of_op)
-row_aligned = LocationOperatorFinderBuilder(row_aligned_op)
-column_aligned = LocationOperatorFinderBuilder(column_aligned_op)
-intersects = LocationOperatorFinderBuilder(intersects_op)
+class max_horizontal_separation(Operation):
+    def __init__(self, max_sep):
+        self.max_sep = max_sep
+
+    def __call__(self, a, b):
+        if b.x > a.x + a.w:
+            sep = b.x - (a.x + a.w)
+        elif a.x > (b.x + b.w):
+            sep = a.x - (b.x + b.w)
+        else:
+            sep = 0
+        return sep <= self.max_sep
+
+    def __repr__(self):
+        return "A to B max horizontal seperation is less than or equal to %r" % (
+            self.max_sep,
+        )
 
 
-class OffsetFromMainPointFinder(object):
-    def __init__(self, base_finder, x_offset=0, y_offset=0):
-        self.base_finder = base_finder
-        self.x_offset = x_offset
-        self.y_offset = y_offset
+class max_vertical_separation(Operation):
+    def __init__(self, max_sep):
+        self.max_sep = max_sep
 
+    def __call__(self, a, b):
+        if b.y > a.y + a.h:
+            sep = b.y - (a.y + a.h)
+        elif a.y > (b.y + b.h):
+            sep = a.y - (b.y + b.h)
+        else:
+            sep = 0
+        return sep <= self.max_sep
+
+    def __repr__(self):
+        return "A to B max vertical seperation less than or equal to %r" % (
+            self.max_sep,
+        )
+
+
+row_aligned = max_horizontal_separation(0)
+column_aligned = max_vertical_separation(0)
+intersects = row_aligned & column_aligned
+
+
+class MergeLocationsFinderFilter(object):
+    def __init__(self, op, finder):
+        self.op = op
+        self.finder = finder
 
     def find(self, gui):
-        for location in self.base_finder.find(gui):
-            x, y = location.main_point
-            yield Location(x + self.x_offset, y + self.y_offset)
+        number_grouped_locations = [[num, loc] for num, loc in
+                                    enumerate(self.finder.find(gui))]
+        for group1 in number_grouped_locations:
+            groups = [group for group in number_grouped_locations if
+                      self.op(group1[1], group[1])]
+            groups.append(group1)
+            num_max = max(i[0] for i in groups)
+            for group in groups:
+                group[0] = num_max
+        for num, group in groupby(
+            sorted(number_grouped_locations),
+            lambda x: x[0]
+        ):
+            locations = [i[1] for i in group]
+            image = locations[0]._image
+            x = min(loc.x for loc in locations)
+            y = min(loc.y for loc in locations)
+            w = max(loc.x + loc.w for loc in locations) - x
+            h = max(loc.y + loc.h for loc in locations) - y
+            yield Location(x, y, w, h, image=image)
+
+    def __repr__(self):
+        return ("Find all with %r then merge results when the following is "
+                "True: %r") % (
+            self.finder,
+            self.op
+        )
+
+
+
+
+
+

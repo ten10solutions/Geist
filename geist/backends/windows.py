@@ -27,7 +27,6 @@ from . import BackendActionBuilder
 
 class _ActionsTransaction(object):
     def __init__(self, backend):
-        self._conn = backend._conn
         self._actions_builder = BackendActionBuilder(backend)
 
     def __enter__(self):
@@ -94,7 +93,7 @@ class GeistWindowsBackend(object):
         return Process(process.pid)
 
     def actions_transaction(self):
-        return _ActionsTransaction()
+        return _ActionsTransaction(self)
 
     @property
     def rect(self):
@@ -219,15 +218,6 @@ class _Mouse(object):
     SM_CYSCREEN = 1
 
     LEFT_BUTTON, MIDDLE_BUTTON, RIGHT_BUTTON = [1, 2, 3]
-
-    def __init__(self):
-        mouse_acceleration = (DWORD*3)()
-        _USER32.SystemParametersInfo(
-            _Mouse.SPI_SETMOUSE,
-            0,
-            byref(mouse_acceleration),
-            0
-        )
 
     def _normalize_coords(self, point):
         norm = 65535
@@ -362,8 +352,8 @@ class Window(object):
         return (
             rect.left,
             rect.top,
-            (rect.right - rect.left) + 1,
-            (rect.bottom - rect.top) + 1,
+            (rect.right - rect.left),
+            (rect.bottom - rect.top),
         )
 
     def set_position(self, rect):

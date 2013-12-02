@@ -2,7 +2,7 @@ from __future__ import division, absolute_import, print_function
 
 import time
 import logging
-from hamcrest import has_length, greater_than_or_equal_to
+from hamcrest import has_length, greater_than_or_equal_to, less_than_or_equal_to
 from hamcrest.core.string_description import tostring as describe_to_string
 from .keyboard import KeyDown, KeyUp, KeyDownUp, keyboard_layout_factory
 
@@ -244,3 +244,32 @@ class GUI(object):
             return True
         except NotFoundError:
             return False
+
+    def does_not_exist_within_timeout(self, finder):
+        try:
+            self.wait_find_with_result_matcher(
+                finder,
+                has_length(less_than_or_equal_to(0))
+            )
+            return True
+        except NotFoundError:
+            return False
+
+
+
+class LocationFinderFilter(object):
+    def __init__(self, filter_func, finder):
+        self.filter_func = filter_func
+        self.finder = finder
+
+    def find(self, gui):
+        for loc in self.finder.find(gui):
+            if self.filter_func(loc):
+                yield loc
+
+    def __repr__(self):
+        return '(Filter results of %r with %r)' % (
+            self.finder,
+            self.filter_func
+        )
+

@@ -8,12 +8,15 @@ from .visualfinders import (
     BinaryRegionFinder,
     MultipleFinderFinder,
     GreyscaleRegionFinder,
+    text_finder_filter_from_path,
+    TextFinderFilter,
 )
 
 from .layoutfinders import (
-    OffsetFromMainPointFinder,
-    LocationOperatorFinderBuilder,
-    MaxDistanceOp,
+    LocationOperatorFinder,
+    MergeLocationsFinderFilter,
+    max_horizontal_separation,
+    max_vertical_separation,
     above,
     below,
     right_of,
@@ -28,5 +31,11 @@ from .repo import (
     TemplateFinderFromRepo,
 )
 
-from .core import Location, NotFoundError, GUI, LocationList
+from .core import (
+    Location,
+    NotFoundError,
+    GUI,
+    LocationList,
+    LocationFinderFilter
+)
 

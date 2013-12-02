@@ -8,9 +8,11 @@ import itertools
 import operator
 from functools import partial
 
+
 def subimage(rect, image):
     x,y,w,h = rect
     return image[y:y+h,x:x+w]
+
 
 def pad_bin_image_to_shape(image, shape):
     h,w = shape
@@ -25,12 +27,14 @@ def pad_bin_image_to_shape(image, shape):
         result = numpy.vstack((result, numpy.zeros((h-ih,w),bool)))
     return result
 
+
 def sum_2d_images(images):
     it = iter(images)
     result = numpy.copy(next(it))
     for image in it:
         result += image
     return result
+
 
 OVERLAP_TABLE = (
     (16,(16,8,4,2,1)),
@@ -45,6 +49,7 @@ OVERLAP_TABLE = (
     (3,(3,1)),
     (2,(2,1))
 )
+
 
 def best_convolution(
     bin_template, bin_image, tollerance=0.5, overlap_table=OVERLAP_TABLE):
@@ -68,6 +73,7 @@ def best_convolution(
         return convolution(bin_template, bin_image, tollerance=tollerance)
     best_overlap = sorted(overlap_options, key=lambda x: (ih // x[0] + th) * (iw // x[1] + tw))[0]
     return overlapped_convolution(bin_template, bin_image, tollerance=tollerance, splits=best_overlap)
+
 
 def convolution(bin_template, bin_image, tollerance=0.5):
     expected = numpy.count_nonzero(bin_template)
@@ -125,6 +131,7 @@ def overlapped_convolution(bin_template, bin_image, tollerance=0.5, splits=(4,2)
         convolution %= num
     return list(results)
 
+
 def get_possible_convolution_regions(bin_template, bin_image, tollerance=0.5,rescale=10):
     result = []
     h,w = bin_template.shape[:2]
@@ -138,6 +145,7 @@ def get_possible_convolution_regions(bin_template, bin_image, tollerance=0.5,res
         bp = prune_unbeneficial_partitions(aoi, bp)
     return result
 
+
 def binary_partition_to_rects(bp, image, template_w, template_h, xoffset=0, yoffset=0):
     h,w = image.shape[2:]
     if bp == None:
@@ -149,6 +157,7 @@ def binary_partition_to_rects(bp, image, template_w, template_h, xoffset=0, yoff
     else:
         new_xoffset, new_yoffset = xoffset + pos, yoffset
         i1, i2 = image[:,pos:], image[:,:pos]
+
 
 def prune_unbeneficial_partitions(image, bp):
     pos, axis, (p1, p2) = bp
@@ -224,6 +233,7 @@ def binary_partition_image(image, min_w=1, min_h=1, depth=0, max_depth=-1):
         p2 = binary_partition_image(image[:,:pos], min_w, min_h, depth+1, max_depth)
     return [pos, axis, [p1, p2]]
 
+
 def draw_binary_partition(image, subdiv, res_image=None, counter=None):
     if res_image is None:
         res_image = numpy.zeros(image.shape)
@@ -248,6 +258,7 @@ def draw_binary_partition(image, subdiv, res_image=None, counter=None):
         draw_binary_partition(i2, p2, s2, counter)
     return res_image
 
+
 def rescale2avg(image):
     sub1 = image[:-1:2,:-1:2]
     sub2 = image[1::2,1::2]
@@ -256,6 +267,7 @@ def rescale2avg(image):
     res += sub2
     res /= 2
     return res.astype(numpy.uint8)
+
 
 def rescale2max(image):
     sub1 = image[:-1:2,:-1:2]
@@ -281,6 +293,7 @@ def rescale3avg(image):
     res /= 3
     return res.astype(numpy.uint8)
 
+
 def rescale3max(image):
     sub1 = image[:-2:3,:-2:3]
     sub2 = image[1:-1:3,1:-1:3]
@@ -300,9 +313,11 @@ def rescale3max(image):
     res[max_map_3] = sub3[max_map_3]
     return res
 
+
 def or_reduce_rescale3max_offset(image):
     return reduce(operator.or_, (rescale3max(image[y1:y2,x1:x2])
         for (y1,y2), (x1,x2) in itertools.product(*[[(i, -(3 - i)) for i in range(3)]]*2)))
+
 
 def numpy_or_all(images):
     it = iter(images)
@@ -311,101 +326,6 @@ def numpy_or_all(images):
         result |= image
     return result
 
-def convolution_r3m_targets(bin_template, bin_image, tollerance=0.5):
-    r_templates = [rescale3max(bin_template[y1:y2,x1:x2]) for (y1,y2), (x1,x2) in itertools.product(*[[(i, -(3 - i)) for i in range(3)]]*2)]
-    r_counts = set(j for j in (numpy.sum(i) for i in r_templates) if j > 0)
-    if not r_counts:
-        return []
-    ored_templates = numpy_or_all(r_templates)
-    r_image = rescale3max(bin_image)
-    h,w = ored_templates.shape[:2]
-    convolution_image = ifft2(fft2(r_image) *
-             fft2(ored_templates[::-1,::-1], r_image.shape)).real
-    return [((fx+3-w)*3,(fy+3-h)*3)  for (fy, fx) in numpy.transpose(numpy.nonzero(numpy_or_all((convolution_image > (i - tollerance)) & (convolution_image < (i + tollerance)) for i in r_counts)))]
-
-def with_bm_and_over_frames(func, num=2):
-    def bm_and_over_frames():
-        if not hasattr(bm_and_over_frames, 'frames'):
-            bm_and_over_frames.frames = []
-        frames = bm_and_over_frames.frames
-        frame = func()
-        frames.append(frame)
-        frames = frames[-num:]
-        result = numpy.copy(frames[0])
-        for frame in frames[1:]:
-            result &= frame
-        return result
-    return bm_and_over_frames
-
-def with_threshhold(func, threshhold):
-    def with_threshhold_wrapper(template, image, *args, **kwargs):
-        return func(template > threshhold,
-                        image > threshhold, *args, **kwargs)
-    return with_threshhold_wrapper
-
-
-def with_edge_enhance(func):
-    def with_edge_enhance_wrapper(template, image, *args, **kwargs):
-        return [(x+1, y+1) for x,y in func(edge_enhance(template),
-                                  edge_enhance(image), *args, **kwargs)]
-    return with_edge_enhance_wrapper
-
-
-def with_greyscale(func):
-    def with_greyscale_wrapper(template, image, *args, **kwargs):
-        return func(grey_scale(template), grey_scale(image), *args,
-                                                               **kwargs)
-    return with_greyscale_wrapper
-
-
-def with_auto_threshhold(func, density=.25, threshhold_min=15,
-                                                    threshhold_max=255):
-    def with_auto_threshhold_wrapper(template, image, *args, **kwargs):
-        threshhold = find_threshold_near_density(template, density,
-                                         threshhold_min, threshhold_max)
-        return func(template > threshhold,
-                                    image > threshhold, *args, **kwargs)
-    return with_auto_threshhold_wrapper
-
-
-def with_template_values_filter(func):
-    def with_template_values_filter_wrapper(template, image, *args,
-                                                              **kwargs):
-        return func(template, filter_greys_using_image(template,image),
-                                                        *args, **kwargs)
-    return with_template_values_filter_wrapper
-
-def with_exact_match(func):
-    def with_exact_match_wrapper(template, image, *args, **kwargs):
-        ih, iw = image.shape[:2]
-        th, tw = template.shape[:2]
-        result = []
-        for x,y in func(template, image, *args, **kwargs):
-            if x >= 0 and y >= 0 and x + tw <= iw and y + th <= ih:
-                if numpy.all(numpy.equal(image[y:y+th, x:x+tw],template)):
-                    result.append((x, y))
-        return result
-    return with_exact_match_wrapper
-
-def with_image_region(func, rect):
-    def with_image_region_wrapper(template, image, *args, **kwargs):
-        x,y,w,h = rect
-        return [(fx+x, fy+y) for fx, fy in func(template,
-                                   image[y:y+h,x:x+w], *args, **kwargs)]
-    return with_image_region_wrapper
-
-def with_as_rects(func):
-    def with_as_rects_wrapper(template, image, *args, **kwargs):
-        h,w = template.shape[:2]
-        return [(x,y,w,h) for x, y in func(template, image,
-                                                       *args, **kwargs)]
-    return with_as_rects_wrapper
-
-approx_find = with_as_rects(with_greyscale
-             (with_edge_enhance(with_threshhold(best_convolution, 10))))
-
-exact_find = with_as_rects(with_exact_match(with_greyscale
-            (with_edge_enhance(with_threshhold(best_convolution, 10)))))
 
 def grey_scale(image):
     """Converts RGB image to Greyscale
@@ -416,14 +336,21 @@ def grey_scale(image):
     """
     return image.astype(numpy.int32).sum(axis=2) // 3
 
-def edge_enhance(image):
-    """Enhance edges and remove areas on solid colour
+
+def find_edges(image):
+    """Find edges and remove areas on solid colour
 
     :param image: input image
     :type image: single channel 2d :class:`numpy.ndarray`
     :rtype: :class:`numpy.ndarray`
     """
-    return numpy.abs((image[1:,:-1].astype(numpy.int16) - image[1:,1:]) | (image[:-1,1:].astype(numpy.int16) - image[1:,1:]))
+    return numpy.abs(
+        (image[1:,:-1].astype(numpy.int16) - image[1:,1:]) |
+        (image[:-1,1:].astype(numpy.int16) - image[1:,1:])
+    )
+
+edge_enhance = find_edges
+
 
 def find_threshold_near_density(img, density, low=0, high=255):
     """Find a threshold where the fraction of pixels above the threshold
@@ -462,6 +389,7 @@ def find_threshold_near_density(img, density, low=0, high=255):
         elif d >= density: # search away from low
             low = t
 
+
 def filter_greys_using_image(image, target):
     """Filter out any values in target not in image
 
@@ -475,21 +403,6 @@ def filter_greys_using_image(image, target):
     mask = numpy.where(numpy.in1d(maskbase, numpy.unique(image)),
                                                             maskbase, 0)
     return mask[target]
-
-def find_rects(template, image, find_func=None):
-    """Yield found rectangles.
-
-    :param template: template to match
-    :param image: image to match in
-    :param find_func: find function to use, default to exact_find
-    :rtype: generator yielding (x,y,w,h)
-
-    """
-    if find_func is None:
-        find_func = exact_find
-    th, tw = template.shape[:2]
-    for x, y in find_func(template, image):
-        yield (x, y, tw, th)
 
 
 def correlation_coefficient_normed(template, image):
@@ -521,27 +434,4 @@ def correlation_coefficient_normed(template, image):
             )
         print y
     return corr_num / corr_denum
-
-
-def subproducts_of_area_slow(image, w, h):
-    H, W = image.shape[:2]
-    subproducts = numpy.zeros((H,W))
-    for y in range(H):
-        for x in range(W):
-            subproducts[y,x] = image[y-(h-1):y+1, x-(w-1):x+1].sum()
-    return subproducts
-
-def subproducts_of_area(image, w, h):
-    return irfft2(
-        rfft2(image) * rfft2(numpy.ones((h,w)), image.shape[:2])
-    ).astype(numpy.uint64)
-
-def calc_norm(image, template):
-    h, w = template.shape[:2]
-    template_distance = template - (template.sum() / template.size)
-    template_distance_sum = template_distance.sum()
-    image_distance = image - (subproducts_of_area(image, w, h) / (template.size))
-    norm = numpy.sqrt(irfft2(rfft2(image_distance**2) * rfft2(template_distance**2, image_distance.shape)).astype(numpy.uint64)).astype(numpy.int64)
-    corr = irfft2(rfft2(image_distance) * rfft2(template_distance, image_distance.shape)).astype(numpy.int64)
-    return numpy.sqrt((image_distance ** 2) * (template_distance_sum ** 2))
 
