@@ -4,11 +4,6 @@ from setuptools import setup
 from glob import glob
 import os
 
-name='geist'
-version='1.1b6'
-release=version
-
-
 with open(os.path.join('geist','version.py')) as f:
     exec(f.read())
 
