@@ -4,6 +4,17 @@ import os
 import os.path
 import glob
 
+
+class Template(object):
+    def __init__(self, image, name, repo):
+        self.image = image
+        self.name = name
+        self.repo = repo
+
+    def __repr__(self):
+        return "template %r in repo %r" % (self.name, self.repo)
+
+
 class DirectoryRepo(object):
     def __init__(self, directory):
         self.__directory = os.path.abspath(directory)
@@ -19,7 +30,7 @@ class DirectoryRepo(object):
         self.__ensure_dir_exists()
         imgpath = os.path.join(self.__directory, key + '.npy')
         if os.path.exists(imgpath):
-            return numpy.load(imgpath)
+            return Template(numpy.load(imgpath), name=key, repo=self)
         else:
             raise KeyError(key)
 
@@ -45,6 +56,9 @@ class DirectoryRepo(object):
     def __iter__(self):
         return iter(os.path.split(i)[1].rsplit('.',1)[0] for i in
                       glob.glob(os.path.join(self.__directory,'*.npy')))
+
+    def __repr__(self):
+        return "directory repo %r" % (self.__directory, )
 
 
 class TemplateFinderFromRepo(object):

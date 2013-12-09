@@ -28,7 +28,7 @@ class Viewer(object):
     def show_repo(self, name, newfig=False):
         if newfig:
             figure()
-        imshow(self._repo[name], cm.Greys_r, interpolation='none')
+        imshow(self._repo[name].image, cm.Greys_r, interpolation='none')
 
     def show_image(self, image):
         imshow(image, interpolation='none')

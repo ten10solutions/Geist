@@ -42,16 +42,19 @@ class ApproxTemplateFinder(object):
         self.template = template
 
     def find(self, gui):
-        h, w = self.template.shape[:2]
+        h, w = self.template.image.shape[:2]
         image = gui.capture()
         gimage = grey_scale(image)
-        gtemplate = grey_scale(self.template)
+        gtemplate = grey_scale(self.template.image)
         edge_image = find_edges(gimage)
         edge_template = find_edges(gtemplate)
         bin_image = edge_image > 10
         bin_template = edge_template > 10
         for x, y in best_convolution(bin_template, bin_image):
             yield Location(x+1, y+1, w, h, image=image)
+
+    def __repr__(self):
+        return "match %r approximately" % (self.template, )
 
 
 class ExactTemplateFinder(object):
@@ -62,7 +65,7 @@ class ExactTemplateFinder(object):
     def find(self, gui):
         image = gui.capture()
         ih, iw = image.shape[:2]
-        th, tw = self.template.shape[:2]
+        th, tw = self.template.image.shape[:2]
         for location in self.approx_template_finder.find(gui):
             x, y = location.x, location.y
             if (x >= 0 and y >= 0 and x + tw <= iw and y + th <= ih):
@@ -71,6 +74,9 @@ class ExactTemplateFinder(object):
                 ):
                     yield location
 
+    def __repr__(self):
+        return "match %r exactly" % (self.template, )
+
 
 class ThresholdTemplateFinder(object):
     def __init__(self, template, threshold):
@@ -78,10 +84,10 @@ class ThresholdTemplateFinder(object):
         self.threshold = threshold
 
     def find(self, gui):
-        h, w = self.template.shape[:2]
+        h, w = self.template.image.shape[:2]
         image = gui.capture()
         gimage = grey_scale(image)
-        gtemplate = grey_scale(self.template)
+        gtemplate = grey_scale(self.template.image)
         threshold_image = gimage > self.threshold
         threshold_template = gtemplate > self.threshold
         edge_image = find_edges(threshold_image)
@@ -90,6 +96,9 @@ class ThresholdTemplateFinder(object):
         bin_template = edge_template > 0
         for x, y in best_convolution(bin_template, bin_image):
             yield Location(x+1, y+1, w, h, image=image)
+
+    def __repr__(self):
+        return "match %r using threshold %r" % (self.template, self.threshold)
 
 
 class MultipleFinderFinder(object):
