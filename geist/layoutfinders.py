@@ -4,24 +4,24 @@ from itertools import groupby
 
 
 class LocationOperatorFinder(object):
-    def __init__(self, operator, a_finder, b_finder):
+    def __init__(self, a_finder, operator, b_finder):
         self._operator = operator
         self._a_finder = a_finder
         self._b_finder = b_finder
 
     def find(self, gui):
-        a_locations = list(self._a_finder.find(gui))
-        for b_location in self._b_finder.find(gui):
-            for a_location in a_locations:
+        b_locations = list(self._b_finder.find(gui))
+        for a_location in self._a_finder.find(gui):
+            for b_location in b_locations:
                 if self._operator(a_location, b_location):
-                    yield b_location
+                    yield a_location
                     break
 
     def __repr__(self):
-        return "A=%r, B=%r: %r" % (
+        return "Things found by [%r] are [%r] thing found by [%r]" % (
             self._a_finder,
-            self._b_finder,
-            self._operator
+            self._operator,
+            self._b_finder
         )
 
 
@@ -41,7 +41,7 @@ class _and(Operation):
         return self.a_op(a, b) and self.b_op(a, b)
 
     def __repr__(self):
-        return "(%r and %r)" % (self.a_op, self.b_op)
+        return "%r and %r" % (self.a_op, self.b_op)
 
 
 class _or(Operation):
@@ -52,7 +52,7 @@ class _or(Operation):
         return self.a_op(a, b) or self.b_op(a, b)
 
     def __repr__(self):
-        return "(%r or %r)" % (self.a_op, self.b_op)
+        return "%r or %r" % (self.a_op, self.b_op)
 
 class _SimpleOperation(Operation):
     def __init__(self, op_func, doc):
@@ -66,19 +66,19 @@ class _SimpleOperation(Operation):
 
 below = _SimpleOperation(
     lambda a, b: b.y + b.h <= a.y,
-    "A is below all of B vertically"
+    "is below"
 )
 above = _SimpleOperation(
     lambda a, b: b.y >= (a.y + a.h),
-    "A is above all of B vertically"
+    "is above"
 )
 left_of = _SimpleOperation(
     lambda a, b: b.x + b.w >= a.x,
-    "A is left of B"
+    "is left of"
 )
 right_of = _SimpleOperation(
     lambda a, b: b.x <= (a.x + a.w),
-    "A is right of B"
+    "is right of"
 )
 
 
@@ -96,7 +96,7 @@ class max_horizontal_separation(Operation):
         return sep <= self.max_sep
 
     def __repr__(self):
-        return "A to B max horizontal seperation is less than or equal to %r" % (
+        return "has horizontal seperation less than or equal to %r" % (
             self.max_sep,
         )
 
@@ -115,13 +115,13 @@ class max_vertical_separation(Operation):
         return sep <= self.max_sep
 
     def __repr__(self):
-        return "A to B max vertical seperation less than or equal to %r" % (
+        return "has vertical seperation less than or equal to %r" % (
             self.max_sep,
         )
 
 
-row_aligned = max_horizontal_separation(0)
-column_aligned = max_vertical_separation(0)
+row_aligned = max_vertical_separation(0)
+column_aligned = max_horizontal_separation(0)
 intersects = row_aligned & column_aligned
 
 

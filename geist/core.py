@@ -21,6 +21,7 @@ class Location(object):
         self._x, self._y, self._w, self._h = x, y, w, h
         if main_point_offset is None:
             main_point_offset = (w // 2, h // 2)
+        self._main_point_offset = main_point_offset
         self._mp_x_offset, self._mp_y_offset = main_point_offset
         self._image = image
 
@@ -51,7 +52,12 @@ class Location(object):
         return self._h
 
     def find(self, gui):
-        yield self
+        yield Location(self.x, self.y, self.w, self.h,
+                       self.main_point_offset, gui.capture())
+
+    @property
+    def main_point_offset(self):
+        return tuple(self._main_point_offset)
 
     @property
     def main_point(self):
@@ -79,8 +85,9 @@ class Location(object):
 
 
 class LocationList(list):
-    def find(self):
-        return iter(self)
+    def find(self, gui):
+        for loc in self:
+            yield next(loc.find(gui))
 
 
 class _LazyGUIMethodSnapshot(object):
@@ -272,4 +279,3 @@ class LocationFinderFilter(object):
             self.finder,
             self.filter_func
         )
-
