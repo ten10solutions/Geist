@@ -5,7 +5,6 @@ from .vision import best_convolution, grey_scale, find_edges
 from .colour import rgb_to_hsv
 from .ocr import Classifier
 import numpy
-from itertools import chain
 from scipy.ndimage.measurements import (
     label,
     find_objects,
@@ -106,7 +105,9 @@ class MultipleFinderFinder(object):
         self.finders = finders
 
     def find(self, gui):
-        return chain(finder.find(gui) for finder in self.finders)
+        for finder in self.finders:
+            for location in finder.find(gui):
+                yield location
 
 
 class BinaryRegionFinder(object):
