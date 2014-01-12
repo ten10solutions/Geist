@@ -9,7 +9,6 @@ def colour_wheel(size=255):
         return colour_wheel.last[1]
     result = numpy.zeros((size, size, 3), numpy.uint8)
     r = cy = cx = size / 2
-    pi2 = math.pi * 2
     for y in range(size):
         for x in range(size):
             dist = numpy.sqrt(numpy.abs(((x - cx) ** 2) + ((y - cy) ** 2)))
