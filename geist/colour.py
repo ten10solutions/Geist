@@ -10,6 +10,7 @@ def filter(colour_filter):
         return result
     return apply_filter
 
+
 def hsv(func):
     def hsv_call(image):
         return func(*rgb_to_hsv(image))
@@ -26,6 +27,7 @@ def rgb(func):
     def rgb_call(image):
         return func(image[:,:,0], image[:,:,1], image[:,:,2])
     return rgb_call
+
 
 def rgb_to_hsv(image):
     min_rgb = image.min(axis=2)

@@ -178,6 +178,7 @@ def prune_unbeneficial_partitions(image, bp):
     else:
         return None
 
+
 def get_partition_scores(image, min_w=1, min_h=1):
     """Return list of best to worst binary splits along the x and y axis.
 
@@ -281,6 +282,7 @@ def rescale2max(image):
     res[max_map] = sub1[max_map]
     res[inv_max_map] = sub2[inv_max_map]
     return res
+
 
 def rescale3avg(image):
     sub1 = image[:-2:3,:-2:3]
@@ -434,4 +436,3 @@ def correlation_coefficient_normed(template, image):
             )
         print y
     return corr_num / corr_denum
-

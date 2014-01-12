@@ -3,6 +3,7 @@ import numpy
 import math
 import colorsys
 
+
 def colour_wheel(size=255):
     if hasattr(colour_wheel,'last') and colour_wheel.last[0] == size:
         return colour_wheel.last[1]
@@ -22,6 +23,7 @@ def colour_wheel(size=255):
             result[y,x] = numpy.array(colorsys.hsv_to_rgb(h, s, v)) * 255
     colour_wheel.last = (size, result)
     return result
+
 
 def greys_chart(w=50, h=200):
     result = numpy.zeros((h,w,3), numpy.uint8)

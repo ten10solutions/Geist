@@ -104,6 +104,7 @@ class _LazyGUIMethodSnapshot(object):
     def __getattr__(self, name):
         if name in self._cached_methods:
             func = getattr(self._target, name)
+
             def cached_function(*args, **kwargs):
                 key = self._get_cache_key(name, *args, **kwargs)
                 if key in self._cache:
@@ -261,7 +262,6 @@ class GUI(object):
             return True
         except NotFoundError:
             return False
-
 
 
 class LocationFinderFilter(object):

@@ -452,4 +452,3 @@ def character_seg_erosion(grey_scale_image):
         char_img = grey_scale_image[:, span[0]:span[1]].copy()
         char_img[mask == False] = 0
         yield char_img
-
