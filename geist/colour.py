@@ -1,6 +1,5 @@
 from __future__ import division
 import numpy
-from collections import namedtuple
 
 
 def filter(colour_filter):

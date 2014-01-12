@@ -1,12 +1,8 @@
 from __future__ import division
-from numpy.fft import fft2, ifft2, irfft2, rfft2
+from numpy.fft import irfft2, rfft2
 import numpy
-import time
-import glob
-from collections import defaultdict, deque
 import itertools
 import operator
-from functools import partial
 
 
 def subimage(rect, image):

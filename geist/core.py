@@ -2,7 +2,8 @@ from __future__ import division, absolute_import, print_function
 
 import time
 import logging
-from hamcrest import has_length, greater_than_or_equal_to, less_than_or_equal_to
+from hamcrest import (
+    has_length, greater_than_or_equal_to, less_than_or_equal_to)
 from hamcrest.core.string_description import tostring as describe_to_string
 from .keyboard import KeyDown, KeyUp, KeyDownUp, keyboard_layout_factory
 

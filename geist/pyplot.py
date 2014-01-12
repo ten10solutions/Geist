@@ -1,6 +1,7 @@
-from matplotlib.pyplot import *
-import numpy
 from itertools import cycle
+from matplotlib.pyplot import cm, figure, gcf, imshow
+import numpy
+
 
 class Viewer(object):
     def __init__(self, gui, repo):
