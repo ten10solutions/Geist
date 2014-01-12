@@ -54,8 +54,8 @@ class DirectoryRepo(object):
         return list(self)
 
     def __iter__(self):
-        return iter(os.path.split(i)[1].rsplit('.',1)[0] for i in
-                      glob.glob(os.path.join(self.__directory,'*.npy')))
+        return iter(os.path.split(i)[1].rsplit('.', 1)[0] for i in
+                    glob.glob(os.path.join(self.__directory, '*.npy')))
 
     def __repr__(self):
         return "directory repo %r" % (self.__directory, )

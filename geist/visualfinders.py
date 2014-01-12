@@ -25,7 +25,7 @@ class TextFinderFilter(object):
         for loc in self.finder.find(gui):
             sub_image = image[loc.y:loc.y + loc.h, loc.x:loc.x + loc.w]
             text = self.classifier.classify(sub_image)
-            if text.replace('?','') == self.text:
+            if text.replace('?', '') == self.text:
                 yield loc
 
 
@@ -50,7 +50,7 @@ class ApproxTemplateFinder(object):
         bin_image = edge_image > 10
         bin_template = edge_template > 10
         for x, y in best_convolution(bin_template, bin_image):
-            yield Location(x+1, y+1, w, h, image=image)
+            yield Location(x + 1, y + 1, w, h, image=image)
 
     def __repr__(self):
         return "match %r approximately" % (self.template, )
@@ -69,7 +69,7 @@ class ExactTemplateFinder(object):
             x, y = location.x, location.y
             if (x >= 0 and y >= 0 and x + tw <= iw and y + th <= ih):
                 if numpy.all(
-                    numpy.equal(image[y:y+th, x:x+tw], self.template)
+                    numpy.equal(image[y:y + th, x:x + tw], self.template)
                 ):
                     yield location
 
@@ -94,7 +94,7 @@ class ThresholdTemplateFinder(object):
         bin_image = edge_image > 0
         bin_template = edge_template > 0
         for x, y in best_convolution(bin_template, bin_image):
-            yield Location(x+1, y+1, w, h, image=image)
+            yield Location(x + 1, y + 1, w, h, image=image)
 
     def __repr__(self):
         return "match %r using threshold %r" % (self.template, self.threshold)

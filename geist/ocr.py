@@ -73,9 +73,9 @@ def local_minima_character_segmentation(
     for start, end in none_empty_spans:
         offset = start
         last_split = start
-        while offset + (h*max_w_h_ratio) < end:
+        while offset + (h * max_w_h_ratio) < end:
             offset += min_char_width
-            local_part = dist[offset:int(offset+(h*max_w_h_ratio))]
+            local_part = dist[offset:int(offset + (h * max_w_h_ratio))]
             try:
                 split_loc = numpy.where(local_part == local_part.min())[0][0]
             except:
@@ -173,7 +173,7 @@ def is_underlined(line):
     a = fast_sum(line, 1)
     l, = a.shape
     third = l // 3
-    ratio = fast_sum(a[third*2:]) / fast_sum(a[third:third*2])
+    ratio = fast_sum(a[third * 2:]) / fast_sum(a[third:third * 2])
     return ratio > 1.4
 
 
@@ -200,8 +200,8 @@ def rotate_around_mean_center(image, angle, center=None):
     mean_y_center = ft_mean(calc_ft_y(image))
     h, w = image.shape
     l = max(h, w)
-    new = numpy.zeros((2*l + h, 2*l + w), numpy.uint8)
-    new[l:l+h, l:l+w] = image
+    new = numpy.zeros((2 * l + h, 2 * l + w), numpy.uint8)
+    new[l:l + h, l:l + w] = image
     return rotate_around_point(
         new,
         angle,
@@ -216,10 +216,10 @@ def rotate_around_point(image, angle, point):
     transform = (
         cos(a),
         -sin(a),
-        x-x*cos(a)+y*sin(a),
+        x - x * cos(a) + y * sin(a),
         sin(a),
         cos(a),
-        y-x*sin(a)-y*cos(a)
+        y - x * sin(a) - y * cos(a)
     )
     pil_image = Image.fromarray(numpy.uint8(image))
     h, w = image.shape
@@ -289,7 +289,7 @@ def mean_differance(d1, d2):
 
 
 def distance(d1, d2):
-    return sum((p2 - p1)**2 for (p1, p2) in zip(d1, d2)) ** 0.5
+    return sum((p2 - p1) ** 2 for (p1, p2) in zip(d1, d2)) ** 0.5
 
 
 def first_two_and_not_two_worst_distance(d1, d2):
@@ -424,15 +424,17 @@ def bin_find_span(bin):
 def _create_spans_and_masks(labels, num_labels):
     if num_labels < 1:
         return
-    masks = [binary_dilation(labels==i) for i in range(1, num_labels+1)]
+    masks = [binary_dilation(labels == i) for i in range(1, num_labels + 1)]
     spans = [bin_find_span(m.sum(0) > 0) for m in masks]
-    sorted_spans_and_masks = sorted(zip(spans, masks), key=lambda x: (x[0][0], -x[0][1]))
+    sorted_spans_and_masks = sorted(zip(spans, masks),
+                                    key=lambda x: (x[0][0], -x[0][1]))
     current_span, current_mask = sorted_spans_and_masks[0]
     for span, mask in sorted_spans_and_masks[1:]:
         if span[0] >= current_span[0] and span[1] <= current_span[1]:
             current_mask |= mask
         else:
-            yield current_span, current_mask[:, current_span[0]:current_span[1]]
+            yield (current_span,
+                   current_mask[:, current_span[0]:current_span[1]])
             current_span, current_mask = span, mask
     yield current_span, current_mask[:, current_span[0]:current_span[1]]
 

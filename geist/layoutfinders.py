@@ -155,7 +155,4 @@ class MergeLocationsFinderFilter(object):
 
     def __repr__(self):
         return ("Find all with %r then merge results when the following is "
-                "True: %r") % (
-            self.finder,
-            self.op
-        )
+                "True: %r") % (self.finder, self.op)

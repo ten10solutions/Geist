@@ -99,7 +99,7 @@ class _LazyGUIMethodSnapshot(object):
     def _get_cache_key(self, name, *args, **kwargs):
         return (name,
                 tuple(args),
-                frozenset((k,v) for k,v in kwargs.iteritems()))
+                frozenset((k, v) for k, v in kwargs.iteritems()))
 
     def __getattr__(self, name):
         if name in self._cached_methods:
@@ -143,11 +143,11 @@ class GUI(object):
             if matcher.matches(results):
                 return results
             if time.time() - start_t > self.config_finder_timeout:
-                raise NotFoundError(
-                    "Waited for results matching %s from %s. Last result %r" % (
-                        describe_to_string(matcher),
-                        finder,
-                        results))
+                raise NotFoundError("Waited for results matching %s from %s."
+                                    "Last result %r" % (
+                                        describe_to_string(matcher),
+                                        finder,
+                                        results))
 
     def wait_find_n(self, n, finder):
         return self.wait_find_with_result_matcher(finder, has_length(n))
