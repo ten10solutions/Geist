@@ -38,4 +38,5 @@ from .core import (
     LocationList,
     LocationFinderFilter
 )
+from .backends import get_platform_backend
 

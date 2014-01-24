@@ -14,7 +14,7 @@ import ooxcb
 from ooxcb.keysymdef import keysyms
 import subprocess
 import os
-from . import BackendActionBuilder
+from ._common import BackendActionBuilder
 
 
 xtest.mixin()

@@ -22,7 +22,7 @@ from ctypes.wintypes import (
     LONG,
     WORD
 )
-from . import BackendActionBuilder
+from ._common import BackendActionBuilder
 
 
 class _ActionsTransaction(object):

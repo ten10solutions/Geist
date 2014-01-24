@@ -54,11 +54,25 @@ class DirectoryRepo(object):
         return list(self)
 
     def __iter__(self):
-        return iter(os.path.split(i)[1].rsplit('.',1)[0] for i in
-                      glob.glob(os.path.join(self.__directory,'*.npy')))
+        return iter(os.path.split(i)[1].rsplit('.', 1)[0] for i in
+                    glob.glob(os.path.join(self.__directory, '*.npy')))
 
     def __repr__(self):
         return "directory repo %r" % (self.__directory, )
+
+
+class TemplateBasedFinder(object):
+    def __init__(self, repo, name, finder_constructor):
+        self._name = name
+        self._repo = repo
+        self._finder_constructor = finder_constructor
+
+    def find(self, gui):
+        for loc in self._finder_constructor(self._repo[self._name]).find(gui):
+            yield loc
+
+    def __repr__(self):
+        return "%s finder for %r" % (self._finder_constructor, self._name)
 
 
 class TemplateFinderFromRepo(object):
@@ -70,7 +84,4 @@ class TemplateFinderFromRepo(object):
         return self._repo.entries
 
     def __getattr__(self, name):
-        if name in self._repo:
-            return self._finder_constructor(self._repo[name])
-        else:
-            raise NameError(name)
+        return TemplateBasedFinder(self._repo, name, self._finder_constructor)
