@@ -77,9 +77,9 @@ _DIB_RGB_COLORS = 0
 
 
 class GeistWindowsBackend(object):
-
     SRCCOPY = 0xCC0020
     SM_CXVIRTUALSCREEN, SM_CYVIRTUALSCREEN = 78, 79
+    BITSPIXEL = 12
 
     def __init__(self):
         self._mouse = _Mouse()
@@ -109,6 +109,14 @@ class GeistWindowsBackend(object):
         _, _, width, height = self.rect
         desktop_dc = _USER32.GetWindowDC(hwnd)
         capture_dc = _GDI32.CreateCompatibleDC(desktop_dc)
+
+        # Check that the screen has bit depth of 32
+        bits = _GDI32.GetDeviceCaps(desktop_dc, GeistWindowsBackend.BITSPIXEL)
+        if bits != 32:
+            raise NotImplementedError(
+                "Geist only supports displays with a bit depth of 32 (%d)"
+                % bits)
+
         bmp = _GDI32.CreateCompatibleBitmap(desktop_dc, width, height)
         _GDI32.SelectObject(capture_dc, bmp)
         _GDI32.BitBlt(
@@ -119,12 +127,12 @@ class GeistWindowsBackend(object):
         bmp_info = _BITMAPINFO()
         bmp_info.bmiHeader.biSize = sizeof(bmp_info)
         bmp_info.bmiHeader.biPlanes = 1
-        bmp_info.bmiHeader.biBitCount = 24
+        bmp_info.bmiHeader.biBitCount = 32
 
         bmp_info.bmiHeader.biWidth = width
         bmp_info.bmiHeader.biHeight = -height
 
-        memarray = numpy.ndarray((height, width), dtype='3B')
+        memarray = numpy.ndarray((height, width), dtype='4B')
         _GDI32.GetDIBits(
             capture_dc,
             bmp,
@@ -137,7 +145,8 @@ class GeistWindowsBackend(object):
         _GDI32.DeleteObject(bmp)
         _GDI32.DeleteDC(capture_dc)
         _GDI32.DeleteDC(desktop_dc)
-        return memarray[:, :, ::-1]
+        #strip alpha and reverse bgr to rgb
+        return memarray[:, :, 2::-1]
 
     def key_down(self, name):
         self._keyboard.key_down(name)
@@ -343,6 +352,8 @@ class Window(object):
     SW_SHOWMAXIMIZED = 3
     SW_SHOWMINIMIZED = 2
 
+    BITSPIXEL = 12
+
     def __init__(self, hwnd):
         self.__hwnd = int(hwnd)
 
@@ -422,6 +433,14 @@ class Window(object):
         _, _, width, height = self.rect()
         window_dc = _USER32.GetWindowDC(self.__hwnd)
         capture_dc = _GDI32.CreateCompatibleDC(window_dc)
+
+        # Check that the screen has bit depth of 32
+        bits = _GDI32.GetDeviceCaps(window_dc, Window.BITSPIXEL)
+        if bits != 32:
+            raise NotImplementedError(
+                "Geist only supports displays with a bit depth of 32 (%d)"
+                % bits)
+
         bmp = _GDI32.CreateCompatibleBitmap(window_dc, width, height)
         _GDI32.SelectObject(capture_dc, bmp)
         _USER32.PrintWindow(self.__hwnd, capture_dc, 0)
@@ -429,12 +448,12 @@ class Window(object):
         bmp_info = _BITMAPINFO()
         bmp_info.bmiHeader.biSize = sizeof(bmp_info)
         bmp_info.bmiHeader.biPlanes = 1
-        bmp_info.bmiHeader.biBitCount = 24
+        bmp_info.bmiHeader.biBitCount = 32
 
         bmp_info.bmiHeader.biWidth = width
         bmp_info.bmiHeader.biHeight = -height
 
-        memarray = numpy.ndarray((height, width), dtype='3B')
+        memarray = numpy.ndarray((height, width), dtype='4B')
         _GDI32.GetDIBits(
             capture_dc,
             bmp,
@@ -449,7 +468,8 @@ class Window(object):
         _GDI32.DeleteDC(capture_dc)
         _GDI32.DeleteDC(window_dc)
 
-        return memarray[:, :, ::-1]
+        #strip alpha and reverse bgr to rgb
+        return memarray[:, :, 2::-1]
 
     def get_child_window_at(self, x, y):
         point = POINT()
