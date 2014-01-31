@@ -1,5 +1,3 @@
-
-
 def keyboard_layout_factory(layout_name):
     if layout_name != 'default':
         raise ValueError('unsupported keyboard layout %r' % (layout_name,))

@@ -54,6 +54,7 @@ class _or(Operation):
     def __repr__(self):
         return "%r or %r" % (self.a_op, self.b_op)
 
+
 class _SimpleOperation(Operation):
     def __init__(self, op_func, doc):
         self.op_func, self.doc = op_func, doc
@@ -154,13 +155,4 @@ class MergeLocationsFinderFilter(object):
 
     def __repr__(self):
         return ("Find all with %r then merge results when the following is "
-                "True: %r") % (
-            self.finder,
-            self.op
-        )
-
-
-
-
-
-
+                "True: %r") % (self.finder, self.op)

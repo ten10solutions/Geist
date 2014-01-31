@@ -2,7 +2,8 @@ from __future__ import division, absolute_import, print_function
 
 import time
 import logging
-from hamcrest import has_length, greater_than_or_equal_to, less_than_or_equal_to
+from hamcrest import (
+    has_length, greater_than_or_equal_to, less_than_or_equal_to)
 from hamcrest.core.string_description import tostring as describe_to_string
 from .keyboard import KeyDown, KeyUp, KeyDownUp, keyboard_layout_factory
 
@@ -99,11 +100,12 @@ class _LazyGUIMethodSnapshot(object):
     def _get_cache_key(self, name, *args, **kwargs):
         return (name,
                 tuple(args),
-                frozenset((k,v) for k,v in kwargs.iteritems()))
+                frozenset((k, v) for k, v in kwargs.iteritems()))
 
     def __getattr__(self, name):
         if name in self._cached_methods:
             func = getattr(self._target, name)
+
             def cached_function(*args, **kwargs):
                 key = self._get_cache_key(name, *args, **kwargs)
                 if key in self._cache:
@@ -142,11 +144,11 @@ class GUI(object):
             if matcher.matches(results):
                 return results
             if time.time() - start_t > self.config_finder_timeout:
-                raise NotFoundError(
-                    "Waited for results matching %s from %s. Last result %r" % (
-                        describe_to_string(matcher),
-                        finder,
-                        results))
+                raise NotFoundError("Waited for results matching %s from %s."
+                                    "Last result %r" % (
+                                        describe_to_string(matcher),
+                                        finder,
+                                        results))
 
     def wait_find_n(self, n, finder):
         return self.wait_find_with_result_matcher(finder, has_length(n))
@@ -261,7 +263,6 @@ class GUI(object):
             return True
         except NotFoundError:
             return False
-
 
 
 class LocationFinderFilter(object):
