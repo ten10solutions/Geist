@@ -5,6 +5,7 @@ import logging
 from hamcrest import (
     has_length, greater_than_or_equal_to, less_than_or_equal_to)
 from hamcrest.core.string_description import tostring as describe_to_string
+import numpy as np
 from .keyboard import KeyDown, KeyUp, KeyDownUp, keyboard_layout_factory
 
 
@@ -263,6 +264,15 @@ class GUI(object):
             return True
         except NotFoundError:
             return False
+
+
+class FileGUI(GUI):
+    def __init__(self, image_file, backend, keyboard_layout=None):
+        super(FileGUI, self).__init__(backend, keyboard_layout)
+        self._image = np.load(image_file)
+
+    def capture(self):
+        return self._image
 
 
 class LocationFinderFilter(object):
