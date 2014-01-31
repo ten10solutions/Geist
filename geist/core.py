@@ -269,10 +269,33 @@ class GUI(object):
 class FileGUI(GUI):
     def __init__(self, image_file, backend, keyboard_layout=None):
         super(FileGUI, self).__init__(backend, keyboard_layout)
-        self._image = np.load(image_file)
+        self.filename = image_file
+        self._image = np.load(self.filename)
 
     def capture(self):
         return self._image
+
+
+class GUICaptureFilter(object):
+    def __init__(self, gui, capture_filter):
+        self._gui = gui
+        self.capture_filter = capture_filter
+
+    def __dir__(self):
+        return dir(self._gui) + ['capture_filter']
+
+    def __str__(self):
+        return str(self._gui)
+
+    def __repr__(self):
+        return repr(self._gui)
+
+    def __getattr__(self, name):
+        if name == "capture":
+            return self.capture_filter(getattr(self._gui, name))
+        else:
+            return getattr(self._gui, name)
+
 
 
 class LocationFinderFilter(object):
