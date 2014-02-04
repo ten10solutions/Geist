@@ -16,17 +16,24 @@ class CouldDoBetterKeyboardLayout(object):
     """
 
     CHAR_TO_NAME_MAP = {
-        '\n': 'return',
-        ' ': 'space',
-        '\t': 'tab',
-        '.': 'period'
+        # Passed char: (char symbol, needs shift)
+        '\n': ('return', False),
+        ' ': ('space', False),
+        '\t': ('tab', False),
+        '.': ('period', False),
+        '!': ('exclam', True),
+        '"': ('quotedbl', True),
+        "'": ('apostrophe', False),
+        '@': ('at', True),
+        '&': ('ampersand', True),
     }
 
     def __call__(self, char):
         if char in CouldDoBetterKeyboardLayout.CHAR_TO_NAME_MAP:
-            return _key_down_up(
-                CouldDoBetterKeyboardLayout.CHAR_TO_NAME_MAP[char]
-            )
+            key, shifting = CouldDoBetterKeyboardLayout.CHAR_TO_NAME_MAP[char]
+            if shifting:
+                return [SHIFT_DOWN] + _key_down_up(key) + [SHIFT_UP]
+            return _key_down_up(key)
         elif char.isalnum():
             if char.isupper():
                 return [SHIFT_DOWN] + _key_down_up(char.lower()) + [SHIFT_UP]
