@@ -1,7 +1,7 @@
 import sys
 
 
-def get_platform_backend(*kwargs):
+def get_platform_backend(**kwargs):
     if sys.platform.startswith('win'):
         import geist.backends.windows
         return geist.backends.windows.GeistWindowsBackend(**kwargs)
