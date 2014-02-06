@@ -1,9 +1,12 @@
 import sys
 
-def get_platform_backend():
+
+def get_platform_backend(*kwargs):
     if sys.platform.startswith('win'):
         import geist.backends.windows
-        return geist.backends.windows.GeistWindowsBackend()
+        return geist.backends.windows.GeistWindowsBackend(**kwargs)
     else:
         import geist.backends.xvfb
-        return geist.backends.xvfb.GeistXvfbBackend(2)
+        if not 'display_num' in kwargs:
+            kwargs['display_num'] = 2
+        return geist.backends.xvfb.GeistXvfbBackend(**kwargs)
