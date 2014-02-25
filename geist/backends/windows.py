@@ -236,16 +236,9 @@ class _Mouse(object):
         return (int(x * (norm / w)), int(y * (norm/h)))
 
     def move(self, point):
+        self._current_point = point
         x, y = self._normalize_coords(point)
-        _USER32.mouse_event(
-            _Mouse.MOUSEEVENTF_MOVE |
-            _Mouse.MOUSEEVENTF_ABSOLUTE |
-            _Mouse.MOUSEEVENTF_VIRTUALDESK,
-            x,
-            y,
-            0,
-            None
-        )
+        _USER32.SetCursorPos(*point)
 
     def scroll(lines):
         _USER32.mouse_event(
