@@ -182,7 +182,8 @@ class _KeyBoard(object):
         'return': '\r',
         'space': ' ',
         'tab': '\t',
-        'period': '.'
+        'period': '.',
+        'minus': '-'
     }
 
     def _convert_keyname_to_virtual_key(self, name):
