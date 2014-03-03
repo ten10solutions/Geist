@@ -158,6 +158,8 @@ class GUI(object):
 
     def click(self, finder):
         point = self.wait_find_one(finder).main_point
+        # problem is numpy 32 bit ints rather than normal...
+        point = (int(point[0]), int(point[1]))
         with self._backend.actions_transaction() as actions:
             actions.add_move(point)
             actions.add_wait(self.config_mouse_move_wait)
@@ -168,6 +170,7 @@ class GUI(object):
 
     def double_click(self, finder):
         point = self.wait_find_one(finder).main_point
+        point = (int(point[0]), int(point[1]))
         with self._backend.actions_transaction() as actions:
             actions.add_move(point)
             actions.add_wait(self.config_mouse_move_wait)
@@ -182,6 +185,7 @@ class GUI(object):
 
     def context_click(self, finder):
         point = self.wait_find_one(finder).main_point
+        point = (int(point[0]), int(point[1]))
         with self._backend.actions_transaction() as actions:
             actions.add_move(point)
             actions.add_wait(self.config_mouse_move_wait)

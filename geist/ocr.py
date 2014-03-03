@@ -4,6 +4,8 @@ from PIL import Image
 import math
 import json
 import logging
+from scipy.ndimage.measurements import label
+from scipy.ndimage import binary_erosion, binary_dilation
 
 logger = logging.getLogger(__name__)
 
@@ -447,7 +449,7 @@ def character_seg_max_vertical_sum(grey_scale_image, fraction=0.05):
         yield grey_scale_image[:, x1:x2]
 
 
-def character_seg_erosion(grey_scale_image):
+def character_seg_erosion(grey_scale_image, max_w_h_ratio=0.85):
     bin_img = grey_scale_image > 0
     labels, num_labels = label(binary_erosion(bin_img > 0))
     for span, mask in _create_spans_and_masks(labels, num_labels):
