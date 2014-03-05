@@ -28,10 +28,9 @@ class TestGUI(unittest.TestCase):
 
 class TestFileGUI(unittest.TestCase):
     def setUp(self):
-        self._backend = get_platform_backend()
         self.filename = "test.npy"
         self.image = np.load("test.npy")
-        self.gui = FileGUI(self.filename, self._backend)
+        self.gui = FileGUI(self.filename)
 
     def test_capture(self):
         actual = self.gui.capture()

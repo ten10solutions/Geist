@@ -267,7 +267,11 @@ class GUI(object):
 
 
 class FileGUI(GUI):
-    def __init__(self, image_file, backend, keyboard_layout=None):
+    """
+    Superclass of GUI which acts the same in all ways, except takes the screen
+    from the given file.
+    """
+    def __init__(self, image_file, backend=None, keyboard_layout=None):
         super(FileGUI, self).__init__(backend, keyboard_layout)
         self.filename = image_file
         self._image = np.load(self.filename)
@@ -277,6 +281,9 @@ class FileGUI(GUI):
 
 
 class GUICaptureFilter(object):
+    """
+    Wrapper for instance of a GUI which applies the given filter to the capture
+    """
     def __init__(self, gui, capture_filter):
         self._gui = gui
         self.capture_filter = capture_filter
@@ -295,7 +302,6 @@ class GUICaptureFilter(object):
             return self.capture_filter(getattr(self._gui, name))
         else:
             return getattr(self._gui, name)
-
 
 
 class LocationFinderFilter(object):
