@@ -4,6 +4,8 @@ from PIL import Image
 import math
 import json
 import logging
+from scipy.ndimage.measurements import label
+from scipy.ndimage import binary_erosion, binary_dilation
 
 logger = logging.getLogger(__name__)
 
@@ -255,15 +257,15 @@ def extract_properties(image):
     ], dtype=numpy.float64)
 
 
-def split_characters(image):
+def split_characters(image, max_w_h_ratio=0.85):
     pimage = process(image)
     for x1, x2 in max_pixel_and_max_vertical_threshold_segmentation(pimage):
         c = pimage[:, x1:x2]
         h, w = c.shape
-        if w / h > 0.85:
+        if w / h > max_w_h_ratio:
             for x3, x4 in local_minima_character_segmentation(
                 c,
-                max_w_h_ratio=0.85
+                max_w_h_ratio=max_w_h_ratio
             ):
                 yield c[:, x3:x4]
         else:
@@ -313,15 +315,15 @@ def best_n_distance_factory(n):
 
 
 class Classifier(object):
-    def __init__(self):
+    def __init__(self, cutoff=0.03):
         self._data = []
-        self.cut_off = 0.03
+        self.cut_off = cutoff
         self.distance_func = best_n_distance_factory(6)
         self.extract_func = split_characters
         self.properties_func = extract_properties
 
-    def train(self, image, text):
-        char_images = list(self.extract_func(image))
+    def train(self, image, text, max_w_h_ratio=0.85):
+        char_images = list(self.extract_func(image, max_w_h_ratio))
         assert len(char_images) == len(text), (
             "%d == %d" % (len(char_images), len(text))
         )
@@ -335,8 +337,8 @@ class Classifier(object):
         self._adjuster = create_scaller_adjuster([d for c, d in self._data])
         self._adjusted_data = [(c, self._adjuster(d)) for c, d in self._data]
 
-    def _classify(self, image):
-        for im in list(self.extract_func(image)):
+    def _classify(self, image, max_w_h_ratio=0.85):
+        for im in list(self.extract_func(image, max_w_h_ratio)):
             d2 = self._adjuster(self.properties_func(im))
             result = []
             for t, d1 in self._adjusted_data:
@@ -344,9 +346,9 @@ class Classifier(object):
                 result.append((dist, t))
             yield sorted(result)
 
-    def classify(self, image, unrecognised='ignore'):
+    def classify(self, image, unrecognised='ignore', max_w_h_ratio=0.85):
         text = []
-        for dists in self._classify(image):
+        for dists in self._classify(image, max_w_h_ratio):
             d, t = dists[0]
             if d > self.cut_off:
                 if unrecognised == 'ignore':
@@ -386,13 +388,13 @@ class Classifier(object):
             table.append(row)
         return key, table
 
-    def diagnose(self, image, expected_text):
+    def diagnose(self, image, expected_text, max_w_h_ratio=0.85):
         def print_data(d):
             print(''.join('% 9s' % ('%.5f' % (i,),) for i in d))
         print('ypos', 'weight', *[
-            i + j for i in ['00', '30', '60', '90'] for j in ['skew', 'kurt']
+             i + j for i in ['00', '30', '60', '90'] for j in ['skew', 'kurt']
         ])
-        for c, im in zip(expected_text, self.extract_func(image)):
+        for c, im in zip(expected_text, self.extract_func(image, max_w_h_ratio)):
             ep2 = self.properties_func(im)
             d2 = self._adjuster(ep2)
             print(c)
@@ -414,6 +416,46 @@ class Classifier(object):
                 print('-' * 20)
             print('=' * 20)
             print()
+            
+    def match_character(self, character, image, tolerance=0.05):
+        character_data = [(char, data) for (char, data) in self._adjusted_data if char == character]
+        image_properties = self.properties_func(image)
+        adjusted_image_properties = self._adjuster(image_properties)
+        if self.distance_func(adjusted_image_properties, character_data[0][1]) < tolerance:
+            return True
+        else:
+            return False
+
+            
+    def match_string(self, string, image, tolerance=0.05):
+        characters = list(self.extract_func(image))
+        if len(string) != len(characters):
+            return False
+        for i in range(len(string)):
+            if not self.match_character(string[i], characters[i], tolerance):
+                return False
+    
+    def contains_string(self, string, image, tolerance=0.5):
+        characters = list(self.extract_func(image))
+        if len(characters) > len(string):
+            number = len(characters) - len(string)
+            flag = False
+            for i in range(number):
+                if self.match_character(string[0], characters[i], tolerance):
+                    # set flag to true so we know there's been a macth
+                    flag = True
+                    # see if rest of string matches
+                    for j in range(len(string)-1):
+                        if not self.match_character(string[j+1], characters[i+j], tolerance):
+                            return False
+            if flag:
+                # if we've seen a macth and not returned false, then we have a match
+                return True
+        elif len(string) > len(characters):
+            return False
+        if self.match_string(string, image, tolerance):
+            return True
+        return False
 
 
 def bin_find_span(bin):
@@ -447,7 +489,7 @@ def character_seg_max_vertical_sum(grey_scale_image, fraction=0.05):
         yield grey_scale_image[:, x1:x2]
 
 
-def character_seg_erosion(grey_scale_image):
+def character_seg_erosion(grey_scale_image, max_w_h_ratio=0.85):
     bin_img = grey_scale_image > 0
     labels, num_labels = label(binary_erosion(bin_img > 0))
     for span, mask in _create_spans_and_masks(labels, num_labels):

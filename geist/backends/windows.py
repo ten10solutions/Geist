@@ -238,7 +238,7 @@ class _Mouse(object):
 
     def move(self, point):
         self._current_point = point
-        x, y = self._normalize_coords(point)
+        x, y = self._normalize_coords(point)        
         _USER32.SetCursorPos(*point)
 
     def scroll(lines):
