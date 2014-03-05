@@ -6,8 +6,11 @@ from geist.core import GUI, FileGUI, GUICaptureFilter
 
 
 class TestGUI(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls._backend = get_platform_backend()
+
     def setUp(self):
-        self._backend = get_platform_backend()
         self.gui = GUI(self._backend)
 
     def test_capture_type(self):
@@ -17,6 +20,10 @@ class TestGUI(unittest.TestCase):
     def test_capture_rgb(self):
         actual = self.gui.capture()
         self.assertEqual(actual[0, 0, :].shape, (3,))
+
+    @classmethod
+    def tearDownClass(self):
+        self._backend.close()
 
 
 class TestFileGUI(unittest.TestCase):
@@ -41,8 +48,11 @@ class TestFileGUI(unittest.TestCase):
 
 
 class TestGUICaptureFilter(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls._backend = get_platform_backend()
+
     def setUp(self):
-        self._backend = get_platform_backend()
         self.actual_gui = GUI(self._backend)
         self.gui = GUICaptureFilter(self.actual_gui, lambda x: x)
 
@@ -58,6 +68,10 @@ class TestGUICaptureFilter(unittest.TestCase):
     def test_capture_rgb(self):
         actual = self.gui.capture()
         self.assertEqual(actual[0, 0, :].shape, (3,))
+
+    @classmethod
+    def tearDownClass(self):
+        self._backend.close()
 
 
 gui_suite = TestLoader().loadTestsFromTestCase(TestGUI)
