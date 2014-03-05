@@ -416,6 +416,46 @@ class Classifier(object):
                 print('-' * 20)
             print('=' * 20)
             print()
+            
+    def match_character(self, character, image, tolerance=0.05):
+        character_data = [(char, data) for (char, data) in self._adjusted_data if char == character]
+        image_properties = self.properties_func(image)
+        adjusted_image_properties = self._adjuster(image_properties)
+        if self.distance_func(adjusted_image_properties, character_data[0][1]) < tolerance:
+            return True
+        else:
+            return False
+
+            
+    def match_string(self, string, image, tolerance=0.05):
+        characters = list(self.extract_func(image))
+        if len(string) != len(characters):
+            return False
+        for i in range(len(string)):
+            if not self.match_character(string[i], characters[i], tolerance):
+                return False
+    
+    def contains_string(self, string, image, tolerance=0.5):
+        characters = list(self.extract_func(image))
+        if len(characters) > len(string):
+            number = len(characters) - len(string)
+            flag = False
+            for i in range(number):
+                if self.match_character(string[0], characters[i], tolerance):
+                    # set flag to true so we know there's been a macth
+                    flag = True
+                    # see if rest of string matches
+                    for j in range(len(string)-1):
+                        if not self.match_character(string[j+1], characters[i+j], tolerance):
+                            return False
+            if flag:
+                # if we've seen a macth and not returned false, then we have a match
+                return True
+        elif len(string) > len(characters):
+            return False
+        if self.match_string(string, image, tolerance):
+            return True
+        return False
 
 
 def bin_find_span(bin):
