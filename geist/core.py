@@ -5,6 +5,7 @@ import logging
 from hamcrest import (
     has_length, greater_than_or_equal_to, less_than_or_equal_to)
 from hamcrest.core.string_description import tostring as describe_to_string
+import numpy as np
 from .keyboard import KeyDown, KeyUp, KeyDownUp, keyboard_layout_factory
 
 
@@ -267,6 +268,44 @@ class GUI(object):
             return True
         except NotFoundError:
             return False
+
+
+class FileGUI(GUI):
+    """
+    Superclass of GUI which acts the same in all ways, except takes the screen
+    from the given file.
+    """
+    def __init__(self, image_file, backend=None, keyboard_layout=None):
+        super(FileGUI, self).__init__(backend, keyboard_layout)
+        self.filename = image_file
+        self._image = np.load(self.filename)
+
+    def capture(self):
+        return self._image
+
+
+class GUICaptureFilter(object):
+    """
+    Wrapper for instance of a GUI which applies the given filter to the capture
+    """
+    def __init__(self, gui, capture_filter):
+        self._gui = gui
+        self.capture_filter = capture_filter
+
+    def __dir__(self):
+        return dir(self._gui) + ['capture_filter']
+
+    def __str__(self):
+        return str(self._gui)
+
+    def __repr__(self):
+        return repr(self._gui)
+
+    def __getattr__(self, name):
+        if name == "capture":
+            return self.capture_filter(getattr(self._gui, name))
+        else:
+            return getattr(self._gui, name)
 
 
 class LocationFinderFilter(object):

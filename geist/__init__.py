@@ -35,6 +35,8 @@ from .core import (
     Location,
     NotFoundError,
     GUI,
+    FileGUI,
+    GUICaptureFilter,
     LocationList,
     LocationFinderFilter
 )
@@ -66,6 +68,8 @@ __all__ = [
     "Location",
     "NotFoundError",
     "GUI",
+    "FileGUI",
+    "GUICaptureFilter",
     "LocationList",
     "LocationFinderFilter"
 ]
