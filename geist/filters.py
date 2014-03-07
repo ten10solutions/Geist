@@ -6,8 +6,8 @@ class LocationFinderFilter(object):
         self.filter_func = filter_func
         self.finder = finder
 
-    def find(self, gui):
-        for loc in self.finder.find(gui):
+    def find(self, in_location):
+        for loc in self.finder.find(in_location):
             if self.filter_func(loc):
                 yield loc
 
@@ -26,8 +26,8 @@ class SortingFinder(object):
         self.finder = finder
         self.key = key
 
-    def find(self, gui):
-        for loc in sorted(self.finder.find(gui), key=self.key):
+    def find(self, in_location):
+        for loc in sorted(self.finder.find(in_location), key=self.key):
             yield loc
 
     def __repr__(self):
@@ -45,13 +45,13 @@ class SliceFinderFilter(object):
         self.finder = finder
         self.slice = slice
 
-    def find(self, gui):
+    def find(self, in_location):
         if self.slice is None:
-            for loc in self.finder.find(gui):
+            for loc in self.finder.find(in_location):
                 yield loc
             return
 
-        for loc in islice(self.finder.find(gui),
+        for loc in islice(self.finder.find(in_location),
                           self.slice.start, self.slice.stop, self.slice.step):
             yield loc
 
