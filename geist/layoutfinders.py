@@ -9,9 +9,9 @@ class LocationOperatorFinder(object):
         self._a_finder = a_finder
         self._b_finder = b_finder
 
-    def find(self, gui):
-        b_locations = list(self._b_finder.find(gui))
-        for a_location in self._a_finder.find(gui):
+    def find(self, in_location):
+        b_locations = list(self._b_finder.find(in_location))
+        for a_location in self._a_finder.find(in_location):
             for b_location in b_locations:
                 if self._operator(a_location, b_location):
                     yield a_location
@@ -82,7 +82,6 @@ right_of = _SimpleOperation(
     "is right of"
 )
 
-
 class max_horizontal_separation(Operation):
     def __init__(self, max_sep):
         self.max_sep = max_sep
@@ -131,9 +130,9 @@ class MergeLocationsFinderFilter(object):
         self.op = op
         self.finder = finder
 
-    def find(self, gui):
+    def find(self, in_location):
         number_grouped_locations = [[num, loc] for num, loc in
-                                    enumerate(self.finder.find(gui))]
+                                    enumerate(self.finder.find(in_location))]
         for group1 in number_grouped_locations:
             groups = [group for group in number_grouped_locations if
                       self.op(group1[1], group[1])]

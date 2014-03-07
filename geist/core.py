@@ -22,19 +22,12 @@ class Location(object):
         self._x, self._y, self._w, self._h = x, y, w, h
         if main_point_offset is None:
             main_point_offset = (w // 2, h // 2)
-        self._main_point_offset = main_point_offset
-        self._mp_x_offset, self._mp_y_offset = main_point_offset
+        self._main_point_offset = tuple(main_point_offset)
         self._image = image
 
     @property
-    def image_region(self):
-        if self._image is None:
-            raise ValueError('Location does not have an image')
-        if self.w < 1:
-            raise ValueError('Location does not have a positive width')
-        if self.h < 1:
-            raise ValueError('Location does not have a positive height')
-        return self._image[self.y:self.y + self.h, self.x:self.x + self.w]
+    def image(self):
+        return self._image
 
     @property
     def x(self):
@@ -52,9 +45,21 @@ class Location(object):
     def h(self):
         return self._h
 
-    def find(self, gui):
-        yield Location(self.x, self.y, self.w, self.h,
-                       self.main_point_offset, gui.capture())
+    def find(self, in_location):
+        assert in_location.image is not None
+        yield self.copy(
+            image=in_location.image[
+                self.y:self.y+self.h, self.x:self.x+self.w
+            ]
+        )
+
+    def copy(self, **update_attrs):
+        attrs = dict(
+            (attr, getattr(self, attr)) for attr in
+            ['x', 'y', 'w', 'h', 'main_point_offset', 'image']
+        )
+        attrs.update(update_attrs)
+        return Location(attrs)
 
     @property
     def main_point_offset(self):
@@ -62,7 +67,10 @@ class Location(object):
 
     @property
     def main_point(self):
-        return (self.x + self._mp_x_offset, self.y + self._mp_y_offset)
+        return (
+            self.x + self._main_point_offset[0],
+            self.y + self._main_point_offset[1]
+        )
 
     @property
     def center(self):
@@ -82,41 +90,13 @@ class Location(object):
             self.y,
             self.w,
             self.h,
-            (self._mp_x_offset,  self._mp_y_offset))
+            self._main_point_offset)
 
 
 class LocationList(list):
-    def find(self, gui):
+    def find(self, in_location):
         for loc in self:
-            yield next(loc.find(gui))
-
-
-class _LazyGUIMethodSnapshot(object):
-    def __init__(self, target, cached_methods=('capture',)):
-        self._target = target
-        self._cache = {}
-        self._cached_methods = cached_methods
-
-    def _get_cache_key(self, name, *args, **kwargs):
-        return (name,
-                tuple(args),
-                frozenset((k, v) for k, v in kwargs.iteritems()))
-
-    def __getattr__(self, name):
-        if name in self._cached_methods:
-            func = getattr(self._target, name)
-
-            def cached_function(*args, **kwargs):
-                key = self._get_cache_key(name, *args, **kwargs)
-                if key in self._cache:
-                    result = self._cache[key]
-                else:
-                    result = func(*args, **kwargs)
-                    self._cache[key] = result
-                return result
-            return cached_function
-        else:
-            return getattr(self._target, name)
+            yield next(loc.find(in_location))
 
 
 class GUI(object):
@@ -131,11 +111,21 @@ class GUI(object):
         self.config_key_down_wait = 0.01
         self.config_key_up_wait = 0.01
 
+    def _find_all_gen(self, finder):
+        for in_location in self._backend.capture_locations():
+            for loc in finder.find(in_location):
+                if (in_location.x, in_location.y) != (0, 0):
+                    loc = loc.copy(
+                        x=loc.x + in_location.x,
+                        y=loc.y + in_location.y
+                    )
+                yield loc
+
     def find_all(self, finder):
         return LocationList(finder.find(_LazyGUIMethodSnapshot(self)))
 
-    def capture(self):
-        return self._backend.capture()
+    def capture_locations(self):
+        return self._backend.capture_locations()
 
     def wait_find_with_result_matcher(self, finder, matcher):
         start_t = time.time()
@@ -233,7 +223,7 @@ class GUI(object):
 
     def drag_relative(self, from_finder, offset):
         from_x, from_y = self.wait_find_one(from_finder)
-        to_x, to_y = (_from[0] + offset[0], _from[1] + offset[1])
+        to_x, to_y = (from_x + offset[0], from_y + offset[1])
         self.drag(
             Location(from_x, from_y),
             Location(to_x, to_y)
@@ -267,3 +257,4 @@ class GUI(object):
             return True
         except NotFoundError:
             return False
+

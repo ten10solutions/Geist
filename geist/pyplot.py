@@ -21,10 +21,10 @@ class Viewer(object):
         y2 = int(numpy.ceil(y2 + 0.5))
         return numpy.array(a.get_images()[-1].get_array()[y1:y2, x1:x2])
 
-    def show_capture(self, newfig=False):
-        if newfig:
+    def show_capture(self):
+        for location in self._gui.capture_locations():
             figure()
-        imshow(self._gui.capture(), interpolation='none')
+            imshow(location.image, interpolation='none')
 
     def show_repo(self, name, newfig=False):
         if newfig:
@@ -35,10 +35,11 @@ class Viewer(object):
         imshow(image, interpolation='none')
 
     def show_found(self, finder):
-        image = self._gui.capture()
-        channel = cycle([0, 1, 2])
-        for l, c in zip(self._gui.find_all(finder), channel):
-            image[l.y:l.y + l.h, l.x:l.x + l.w, :] *= 0.75
-            image[l.y:l.y + l.h, l.x:l.x + l.w, c] = 255
-
-        imshow(image, interpolation='none')
+        for location in self._gui.capture_locations():
+            figure()
+            image = numpy.copy(location.image)
+            channel = cycle([0, 1, 2])
+            for l, c in zip(finder.find(location), channel):
+                image[l.y:l.y + l.h, l.x:l.x + l.w, :] *= 0.75
+                image[l.y:l.y + l.h, l.x:l.x + l.w, c] = 255
+            imshow(image, interpolation='none')

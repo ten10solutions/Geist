@@ -20,9 +20,9 @@ class TextFinderFilter(object):
         self.text = text
         self.finder = finder
 
-    def find(self, gui):
-        image = gui.capture()
-        for loc in self.finder.find(gui):
+    def find(self, in_location):
+        image = in_location.image
+        for loc in self.finder.find(in_location):
             sub_image = image[loc.y:loc.y + loc.h, loc.x:loc.x + loc.w]
             text = self.classifier.classify(sub_image)
             if text.replace('?', '') == self.text:
@@ -40,9 +40,9 @@ class ApproxTemplateFinder(object):
     def __init__(self, template):
         self.template = template
 
-    def find(self, gui):
+    def find(self, in_location):
         h, w = self.template.image.shape[:2]
-        image = gui.capture()
+        image = in_location.image
         gimage = grey_scale(image)
         gtemplate = grey_scale(self.template.image)
         edge_image = find_edges(gimage)
@@ -61,15 +61,15 @@ class ExactTemplateFinder(object):
         self.template = template
         self.approx_template_finder = ApproxTemplateFinder(self.template)
 
-    def find(self, gui):
-        image = gui.capture()
+    def find(self, in_location):
+        image = in_location.image
         ih, iw = image.shape[:2]
         th, tw = self.template.image.shape[:2]
-        for location in self.approx_template_finder.find(gui):
+        for location in self.approx_template_finder.find(in_location):
             x, y = location.x, location.y
             if (x >= 0 and y >= 0 and x + tw <= iw and y + th <= ih):
                 if numpy.all(
-                    numpy.equal(image[y:y + th, x:x + tw], self.template)
+                    numpy.equal(image[y:y + th, x:x + tw], self.template.image)
                 ):
                     yield location
 
@@ -82,9 +82,9 @@ class ThresholdTemplateFinder(object):
         self.template = template
         self.threshold = threshold
 
-    def find(self, gui):
+    def find(self, in_location):
         h, w = self.template.image.shape[:2]
-        image = gui.capture()
+        image = in_location.image
         gimage = grey_scale(image)
         gtemplate = grey_scale(self.template.image)
         threshold_image = gimage > self.threshold
@@ -104,9 +104,9 @@ class MultipleFinderFinder(object):
     def __init__(self, *finders):
         self.finders = finders
 
-    def find(self, gui):
+    def find(self, in_location):
         for finder in self.finders:
-            for location in finder.find(gui):
+            for location in finder.find(in_location):
                 yield location
 
 
@@ -114,8 +114,8 @@ class BinaryRegionFinder(object):
     def __init__(self, binary_image_function):
         self.binary_image_function = binary_image_function
 
-    def find(self, gui):
-        image = gui.capture()
+    def find(self, in_location):
+        image = in_location.image
         bin_image = self.binary_image_function(image)
         for y_slice, x_slice in find_objects(*label(bin_image)):
             yield Location(
@@ -133,8 +133,8 @@ class ColourRegionFinder(object):
             lambda image: colour_filter(*rgb_to_hsv(image))
         )
 
-    def find(self, gui):
-        return self.binary_finder.find(gui)
+    def find(self, in_location):
+        return self.binary_finder.find(in_location)
 
 
 class GreyscaleRegionFinder(object):
@@ -143,5 +143,5 @@ class GreyscaleRegionFinder(object):
             lambda image: grey_scale_filter(grey_scale(image))
         )
 
-    def find(self, gui):
-        return self.binary_finder.find(gui)
+    def find(self, in_location):
+        return self.binary_finder.find(in_location)

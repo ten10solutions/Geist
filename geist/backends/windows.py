@@ -23,6 +23,7 @@ from ctypes.wintypes import (
     WORD
 )
 from ._common import BackendActionBuilder
+from geist.core import Location, LocationList
 
 
 class _ActionsTransaction(object):
@@ -95,18 +96,12 @@ class GeistWindowsBackend(object):
     def actions_transaction(self):
         return _ActionsTransaction(self)
 
-    @property
-    def rect(self):
-        return (
-            0,
-            0,
+    def capture_locations(self):
+        hwnd = _USER32.GetDesktopWindow()
+        width, height = (
             _USER32.GetSystemMetrics(GeistWindowsBackend.SM_CXVIRTUALSCREEN),
             _USER32.GetSystemMetrics(GeistWindowsBackend.SM_CYVIRTUALSCREEN)
         )
-
-    def capture(self):
-        hwnd = _USER32.GetDesktopWindow()
-        _, _, width, height = self.rect
         desktop_dc = _USER32.GetWindowDC(hwnd)
         capture_dc = _GDI32.CreateCompatibleDC(desktop_dc)
 
@@ -146,7 +141,8 @@ class GeistWindowsBackend(object):
         _GDI32.DeleteDC(capture_dc)
         _GDI32.DeleteDC(desktop_dc)
         #strip alpha and reverse bgr to rgb
-        return memarray[:, :, 2::-1]
+        image = memarray[:, :, 2::-1]
+        return LocationList([Location(0, 0, width, height, image=image)])
 
     def key_down(self, name):
         self._keyboard.key_down(name)
@@ -351,7 +347,7 @@ class Window(object):
     def __init__(self, hwnd):
         self.__hwnd = int(hwnd)
 
-    def rect(self):
+    def _rect(self):
         rect = RECT()
         _USER32.GetWindowRect(self.__hwnd, byref(rect))
         return (
@@ -423,8 +419,8 @@ class Window(object):
         except:
             return False
 
-    def capture(self):
-        _, _, width, height = self.rect()
+    def capture_locations(self):
+        x, y, width, height = self._rect()
         window_dc = _USER32.GetWindowDC(self.__hwnd)
         capture_dc = _GDI32.CreateCompatibleDC(window_dc)
 
@@ -463,7 +459,8 @@ class Window(object):
         _GDI32.DeleteDC(window_dc)
 
         #strip alpha and reverse bgr to rgb
-        return memarray[:, :, 2::-1]
+        image = memarray[:, :, 2::-1]
+        return LocationList([Location(x, y, width, height, image=image)])
 
     def get_child_window_at(self, x, y):
         point = POINT()

@@ -67,8 +67,10 @@ class TemplateBasedFinder(object):
         self._repo = repo
         self._finder_constructor = finder_constructor
 
-    def find(self, gui):
-        for loc in self._finder_constructor(self._repo[self._name]).find(gui):
+    def find(self, in_location):
+        for loc in self._finder_constructor(self._repo[self._name]).find(
+            in_location
+        ):
             yield loc
 
     def __repr__(self):

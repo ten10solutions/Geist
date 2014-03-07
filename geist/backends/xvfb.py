@@ -7,6 +7,7 @@ import os
 import shutil
 import struct
 from ._x11_common import GeistXBase
+from geist.core import Location, LocationList
 
 
 class XwdToNumpyReader(object):
@@ -69,12 +70,10 @@ class GeistXvfbBackend(GeistXBase):
         GeistXBase.__init__(self, display=display)
         self._xwd_reader = XwdToNumpyReader(fb_filepath)
 
-    @property
-    def rect(self):
-        return self._xwd_reader.get_rect()
-
-    def capture(self):
-        return self._xwd_reader.get_image()
+    def capture_locations(self):
+        image = self._xwd_reader.get_image()
+        h, w = image.shape[:2]
+        return LocationList([Location(0, 0, w, h, image=image)])
 
     def close(self):
         print("closing geist xvfb")

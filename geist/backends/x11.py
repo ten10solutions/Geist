@@ -8,6 +8,7 @@ from ooxcb.protocol import (
 
 from operator import attrgetter
 from ._x11_common import GeistXBase
+from geist.core import Location, LocationList
 
 
 xproto.mixin()
@@ -25,13 +26,9 @@ class GeistXBackend(GeistXBase):
     def __init__(self, display=':0'):
         GeistXBase.__init__(self, display=display)
 
-    @property
-    def rect(self):
+    def capture_locations(self):
         geometry_getter = attrgetter('x', 'y', 'width', 'height')
-        return geometry_getter(self._root.get_geometry().reply())
-
-    def capture(self):
-        x, y, w, h = self.rect
+        x, y, w, h = geometry_getter(self._root.get_geometry().reply())
         raw_img = self._root.get_image(
             xproto.ImageFormat.XYPixmap,
             x,
@@ -48,4 +45,4 @@ class GeistXBackend(GeistXBase):
         res[:, :, 0] = _bit_c_to_byte(im[0])
         res[:, :, 1] = _bit_c_to_byte(im[1])
         res[:, :, 2] = _bit_c_to_byte(im[2])
-        return res
+        return LocationList([Location(x, y, w, h, image=res)])
