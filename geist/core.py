@@ -92,6 +92,18 @@ class Location(object):
             self.h,
             self._main_point_offset)
 
+    def __eq__(self, other):
+        if self.x != other.x or self.y != other.y:
+            return False
+        if self.w != other.w or self.h != other.h:
+            return False
+        if self.main_point_offset != other.main_point_offset:
+            return False
+        return True
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
 
 class LocationList(list):
     def find(self, in_location):
