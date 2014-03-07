@@ -11,13 +11,13 @@ logger = base_logger.getChild('filters')
 class TestSortingFinder(unittest.TestCase):
     def setUp(self):
         self.gui = GUI(GeistFakeBackend())
-        self.locs = LocationList([Location(0, 0, h=10, w=10),
-                                  Location(0, 1, h=10, w=10),
-                                  Location(0, -5, h=10, w=10),
-                                  Location(0, 1, h=10, w=10)])
-        self.key = lambda loc: loc.y
 
     def test_sort(self):
+        self.locs = LocationList([Location(0, 0, w=10, h=10),
+                                  Location(0, 1, w=10, h=10),
+                                  Location(0, -5, w=10, h=10),
+                                  Location(0, 1, w=10, h=10)])
+        self.key = lambda loc: loc.y
         expected = sorted(self.locs, key=self.key)
         finder = SortingFinder(self.locs, key=self.key)
         actual = self.gui.find_all(finder)
