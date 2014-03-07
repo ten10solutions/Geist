@@ -267,20 +267,3 @@ class GUI(object):
             return True
         except NotFoundError:
             return False
-
-
-class LocationFinderFilter(object):
-    def __init__(self, filter_func, finder):
-        self.filter_func = filter_func
-        self.finder = finder
-
-    def find(self, gui):
-        for loc in self.finder.find(gui):
-            if self.filter_func(loc):
-                yield loc
-
-    def __repr__(self):
-        return '(Filter results of %r with %r)' % (
-            self.finder,
-            self.filter_func
-        )

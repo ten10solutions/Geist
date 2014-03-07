@@ -36,8 +36,14 @@ from .core import (
     NotFoundError,
     GUI,
     LocationList,
-    LocationFinderFilter
 )
+
+from .filters import (
+    LocationFinderFilter,
+    SortingFinder,
+    SliceFinderFilter,
+)
+
 from .backends import get_platform_backend
 
 __all__ = [
@@ -67,5 +73,8 @@ __all__ = [
     "NotFoundError",
     "GUI",
     "LocationList",
-    "LocationFinderFilter"
+    "LocationFinderFilter",
+    "SortingFinder",
+    "SliceFinderFilter",
+    "get_platform_backend",
 ]
