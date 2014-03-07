@@ -22,12 +22,17 @@ class SortingFinder(object):
     """
     Sort found locations with the given key
     """
-    def __init__(self, finder, key):
+    def __init__(self, finder, key, reverse=False):
         self.finder = finder
         self.key = key
+        self.reverse = reverse
 
     def find(self, in_location):
-        for loc in sorted(self.finder.find(in_location), key=self.key):
+        for loc in sorted(
+            self.finder.find(in_location),
+            key=self.key,
+            reverse=self.reverse
+        ):
             yield loc
 
     def __repr__(self):
@@ -40,8 +45,6 @@ class SliceFinderFilter(object):
     """
 
     def __init__(self, finder, slice=None):
-        if slice.start < 0 or slice.stop < 0 or slice.step <= 0:
-            raise ValueError("Slices must be positive")
         self.finder = finder
         self.slice = slice
 
@@ -64,3 +67,23 @@ class SliceFinderFilter(object):
         return "%r[%d:%d:%s]" % (self.finder,
                                  self.slice.start, self.slice.stop,
                                  self.slice.step)
+
+
+left_most = lambda finder: SliceFinderFilter(
+    SortingFinder(finder, lambda loc: loc.x)
+)[0]
+
+
+right_most = lambda finder: SliceFinderFilter(
+    SortingFinder(finder, lambda loc: loc.x, reverse=True)
+)[0]
+
+
+top_most = lambda finder: SliceFinderFilter(
+    SortingFinder(finder, lambda loc: loc.y)
+)[0]
+
+
+bottom_most = lambda finder: SliceFinderFilter(
+    SortingFinder(finder, lambda loc: loc.y, reverse=True)
+)[0]

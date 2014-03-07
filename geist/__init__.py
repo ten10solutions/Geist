@@ -41,6 +41,10 @@ from .filters import (
     LocationFinderFilter,
     SortingFinder,
     SliceFinderFilter,
+    left_most,
+    right_most,
+    top_most,
+    bottom_most
 )
 
 from .backends import get_platform_backend
