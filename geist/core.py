@@ -59,7 +59,7 @@ class Location(object):
             ['x', 'y', 'w', 'h', 'main_point_offset', 'image']
         )
         attrs.update(update_attrs)
-        return Location(attrs)
+        return Location(**attrs)
 
     @property
     def main_point_offset(self):
@@ -112,7 +112,7 @@ class GUI(object):
         self.config_key_up_wait = 0.01
 
     def _find_all_gen(self, finder):
-        for in_location in self._backend.capture_locations():
+        for in_location in self.capture_locations():
             for loc in finder.find(in_location):
                 if (in_location.x, in_location.y) != (0, 0):
                     loc = loc.copy(
@@ -122,10 +122,10 @@ class GUI(object):
                 yield loc
 
     def find_all(self, finder):
-        return LocationList(finder.find(_LazyGUIMethodSnapshot(self)))
+        return LocationList(self._find_all_gen(finder))
 
     def capture_locations(self):
-        return self._backend.capture_locations()
+        return LocationList(self._backend.capture_locations())
 
     def wait_find_with_result_matcher(self, finder, matcher):
         start_t = time.time()

@@ -3,6 +3,28 @@ from .core import Location
 from itertools import groupby
 
 
+class FinderInFinder(object):
+    def __init__(self, finder, in_finder):
+        self._finder = finder
+        self._in_finder = in_finder
+
+    def find(self, in_location):
+        for location in self._in_finder.find(in_location):
+            for sub_location in self._finder.find(location):
+                if (location.x, location.y) != (0, 0):
+                    sub_location = sub_location.copy(
+                        x=sub_location.x + location.x,
+                        y=sub_location.y + location.y
+                    )
+                yield sub_location
+
+    def __repr__(self):
+        return "match things found by [%r] in locations found by [%r]" % (
+            self._finder,
+            self._in_finder,
+        )
+
+
 class LocationOperatorFinder(object):
     def __init__(self, a_finder, operator, b_finder):
         self._operator = operator

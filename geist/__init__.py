@@ -11,6 +11,7 @@ from .visualfinders import (
 )
 
 from .layoutfinders import (
+    FinderInFinder,
     LocationOperatorFinder,
     MergeLocationsFinderFilter,
     max_horizontal_separation,
