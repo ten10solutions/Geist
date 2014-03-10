@@ -172,7 +172,7 @@ class MergeLocationsFinderFilter(object):
             y = min(loc.y for loc in locations)
             w = max(loc.x + loc.w for loc in locations) - x
             h = max(loc.y + loc.h for loc in locations) - y
-            yield Location(x, y, w, h, image=image)
+            yield Location(x, y, w, h, parent=in_location)
 
     def __repr__(self):
         return ("Find all with %r then merge results when the following is "

@@ -18,24 +18,60 @@ class NotFoundError(LookupError):
 
 
 class Location(object):
-    def __init__(self, x, y, w=0, h=0, main_point_offset=None, image=None):
-        self._x, self._y, self._w, self._h = x, y, w, h
+    def __init__(self, rel_x, rel_y, w=0, h=0, main_point_offset=None,
+                 parent=None, image=None):
+        self._rel_x, self._rel_y, self._w, self._h = rel_x, rel_y, w, h
         if main_point_offset is None:
-            main_point_offset = (w // 2, h // 2)
-        self._main_point_offset = tuple(main_point_offset)
-        self._image = image
+            self._main_point_offset = (w // 2, h // 2)
+        else:
+            self._main_point_offset = tuple(main_point_offset)
+        self._parent = parent
+        if image is not None:
+            ih, iw = image.shape[:2]
+            if ih != h or iw != w:
+                raise AssertionError('image width and height should be the '
+                                     'same as the locations')
+            self._image = image
+
+    @property
+    def parent(self):
+        return self._parent
 
     @property
     def image(self):
-        return self._image
+        if self.w < 1 or self.h < 1:
+            raise AttributeError(
+                "Can not get image from Locations with zero width or height"
+            )
+        if self.parent is not None:
+            return self.parent.image[self.rel_y:self.rel_y+self.h,
+                                     self.rel_x:self.rel_x+self.w]
+        if self._image is not None:
+            return self._image
+        else:
+            return numpy.zeros((self.h, self.w, 3), dtype=numpy.uint8)
+
+    @property
+    def rel_x(self):
+        return self._rel_x
+
+    @property
+    def rel_y(self):
+        return self._rel_y
 
     @property
     def x(self):
-        return self._x
+        if self.parent is None:
+            return self.rel_x
+        else:
+            return self.rel_x + self.parent.x
 
     @property
     def y(self):
-        return self._y
+        if self.parent is None:
+            return self.rel_y
+        else:
+            return self.rel_y + self.parent.y
 
     @property
     def w(self):
@@ -46,24 +82,22 @@ class Location(object):
         return self._h
 
     def find(self, in_location):
-        assert in_location.image is not None
         yield self.copy(
-            image=in_location.image[
-                self.y:self.y+self.h, self.x:self.x+self.w
-            ]
+            parent=in_location
         )
 
     def copy(self, **update_attrs):
         attrs = dict(
             (attr, getattr(self, attr)) for attr in
-            ['x', 'y', 'w', 'h', 'main_point_offset', 'image']
+            ['x', 'y', 'w', 'h', 'main_point_offset', 'parent']
         )
+        attrs['image'] = self._image
         attrs.update(update_attrs)
         return Location(**attrs)
 
     @property
     def main_point_offset(self):
-        return tuple(self._main_point_offset)
+        return self._main_point_offset
 
     @property
     def main_point(self):
@@ -85,12 +119,14 @@ class Location(object):
         return self.w * self.h
 
     def __repr__(self):
-        return "Location(x=%r, y=%r, w=%r, h=%r, main_point_offset=%r)" % (
+        return "Location(x=%r, y=%r, w=%r, h=%r, main_point_offset=%r, parent=%r)" % (
             self.x,
             self.y,
             self.w,
             self.h,
-            self._main_point_offset)
+            self._main_point_offset,
+            self.parent,
+            )
 
 
 class LocationList(list):
