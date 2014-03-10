@@ -20,6 +20,15 @@ class NotFoundError(LookupError):
 class Location(object):
     def __init__(self, rel_x, rel_y, w=0, h=0, main_point_offset=None,
                  parent=None, image=None):
+        if rel_x < 0:
+            raise ValueError('rel_x must be >= 0')
+        if rel_y < 0:
+            raise ValueError('rel_y must be >= 0')
+        if parent is not None and w > parent.w:
+            raise ValueError('w must be <= parent.w or parent must be None')
+        if parent is not None and h > parent.h:
+            raise ValueError('h must be <= parent.h or parent must be None')
+
         self._rel_x, self._rel_y, self._w, self._h = rel_x, rel_y, w, h
         if main_point_offset is None:
             self._main_point_offset = (w // 2, h // 2)
@@ -82,9 +91,12 @@ class Location(object):
         return self._h
 
     def find(self, in_location):
-        yield self.copy(
-            parent=in_location
-        )
+        if (
+            self.rel_x + self.w <= in_location.x + in_location.w
+        ) and (
+            self.rel_y + self.h <= in_location.y + in_location.h
+        ):
+            yield self.copy(parent=in_location)
 
     def copy(self, **update_attrs):
         attrs = dict(
@@ -132,7 +144,10 @@ class Location(object):
 class LocationList(list):
     def find(self, in_location):
         for loc in self:
-            yield next(loc.find(in_location))
+            try:
+                yield next(loc.find(in_location))
+            except StopIteration:
+                pass
 
 
 class GUI(object):
