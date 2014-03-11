@@ -32,19 +32,21 @@ def sum_2d_images(images):
     return result
 
 
-OVERLAP_TABLE = (
-    (16, (16, 8, 4, 2, 1)),
-    (15, (15, 5, 3, 1)),
-    (12, (12, 6, 4, 3, 2, 1)),
-    (10, (10, 5, 2, 1)),
-    (9, (9, 3, 1)),
-    (8, (8, 4, 2, 1)),
-    (6, (6, 3, 2, 1)),
-    (5, (5, 1)),
-    (4, (4, 2, 1)),
-    (3, (3, 1)),
-    (2, (2, 1))
-)
+OVERLAP_TABLE = {
+    16: (16, 8, 4, 2, 1),
+    15: (15, 5, 3, 1),
+    12: (12, 6, 4, 3, 2, 1),
+    10: (10, 5, 2, 1),
+    9: (9, 3, 1),
+    8: (8, 4, 2, 1),
+    6: (6, 3, 2, 1),
+    5: (5, 1),
+    4: (4, 2, 1),
+    3: (3, 1),
+    2: (2, 1)
+}
+# A number near float max which we don't want to get near to keep precision
+ACCURACY_LIMIT = 2 ** (64 - 22)
 
 
 def best_convolution(bin_template, bin_image,
@@ -54,22 +56,40 @@ def best_convolution(bin_template, bin_image,
 
     Returns a list of matches in (width, height, x offset, y offset)
     format (where the x and y offsets are from the top left corner).
+
+    As the images are binary images, we can utilise the extra bit space in the
+    float64's by cutting the image into tiles and stacking them into variable
+    grayscale values.
+
+    This allows converting a sparse binary image into a dense(r) grayscale one.
     """
-    count = numpy.count_nonzero(bin_template)
+
+    template_sum = numpy.count_nonzero(bin_template)
     th, tw = bin_template.shape
     ih, iw = bin_image.shape
-    if count == 0 or th == 0 or tw == 0:
+    if template_sum == 0 or th == 0 or tw == 0:
+        # If we don't have a template
         return []
     if th > ih or tw > iw:
+        # If the template is bigger than the image
         return []
-    max_sh = ih // th
-    max_sw = iw // th
-    overlap_options = [(d, n // d) for n, divs in [(n, divs) for n, divs in overlap_table if ((count + 1) ** (n)) < 2 ** 44] for d in divs if d <= max_sh and n // d <= max_sw]
+
+    # How many cells can we split the image into?
+    max_vert_cells = ih // th
+    max_hor_cells = iw // th
+
+    # Try to work out how many times we can stack the image
+    usable_factors = [(n, factors) for n, factors in overlap_table.iteritems()
+                      if ((template_sum + 1) ** (n)) < ACCURACY_LIMIT]
+    overlap_options = [(factor, n // factor)
+                       for n, factors in usable_factors for factor in factors
+                       if (factor <= max_vert_cells and
+                           n // factor <= max_hor_cells)]
     if not overlap_options:
+        # We can't stack the image
         return convolution(bin_template, bin_image, tollerance=tollerance)
-    best_overlap = sorted(overlap_options,
-                          key=lambda x: (
-                              (ih // x[0] + th) * (iw // x[1] + tw)))[0]
+    best_overlap = min(overlap_options,
+                       key=lambda x: ((ih // x[0] + th) * (iw // x[1] + tw)))
     return overlapped_convolution(bin_template, bin_image,
                                   tollerance=tollerance, splits=best_overlap)
 
