@@ -11,6 +11,9 @@ def subimage(rect, image):
 
 
 def pad_bin_image_to_shape(image, shape):
+    """
+    Padd image to size :shape: with zeros
+    """
     h, w = shape
     ih, iw = image.shape
     assert ih <= h
@@ -79,10 +82,11 @@ def best_convolution(bin_template, bin_image,
     max_hor_cells = iw // th
 
     # Try to work out how many times we can stack the image
-    usable_factors = [(n, factors) for n, factors in overlap_table.iteritems()
-                      if ((template_sum + 1) ** (n)) < ACCURACY_LIMIT]
+    usable_factors = {n: factors for n, factors in overlap_table.iteritems()
+                      if ((template_sum + 1) ** (n)) < ACCURACY_LIMIT}
     overlap_options = [(factor, n // factor)
-                       for n, factors in usable_factors for factor in factors
+                       for n, factors in usable_factors.iteritems()
+                       for factor in factors
                        if (factor <= max_vert_cells and
                            n // factor <= max_hor_cells)]
     if not overlap_options:
