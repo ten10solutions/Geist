@@ -114,6 +114,8 @@ def convolution(bin_template, bin_image, tollerance=0.5):
                                                  bin_image.shape)
     # Reverse the FFT to find the result image
     convolution_image = irfft2(convolution_freqs)
+    # At this point, the maximum point in convolution_image should be the
+    # bottom right (why?) of the area of greatest match
 
     # The areas in the result image within expected +- tollerance are where we
     # saw matches
@@ -137,35 +139,40 @@ def overlapped_convolution(bin_template, bin_image,
     yoffset = [(i * h, ((i + 1) * h) + (th - 1)) for i in range(hs)]
     xoffset = [(i * w, ((i + 1) * w) + (tw - 1)) for i in range(ws)]
 
-    data = [((x1, y1), bin_image[y1:y2, x1:x2], float((count + 1) ** (num)))
-            for num, (x1, x2, y1, y2) in
-            enumerate((x1, x2, y1, y2) for (x1, x2)
-                      in xoffset for (y1, y2) in yoffset)]
+    # image_stacks is Origin (x,y), array, z (height in stack)
+    image_stacks = [((x1, y1), bin_image[y1:y2, x1:x2], float((count + 1) ** (num)))
+                    for num, (x1, x2, y1, y2) in
+                    enumerate((x1, x2, y1, y2) for (x1, x2)
+                              in xoffset for (y1, y2) in yoffset)]
 
-    pad_h = max(i.shape[0] for _, i, _ in data)
-    pad_w = max(i.shape[1] for _, i, _ in data)
+    pad_h = max(i.shape[0] for _, i, _ in image_stacks)
+    pad_w = max(i.shape[1] for _, i, _ in image_stacks)
 
     # rfft metrics must be an even size - why ... maths?
-    if pad_w % 2 == 1:
-        pad_w += 1
-    if pad_h % 2 == 1:
-        pad_h += 1
+    pad_w += pad_w % 2
+    pad_h += pad_h % 2
 
     overlapped_image = sum_2d_images(pad_bin_image_to_shape(i, (pad_h, pad_w))
-                                     * num for _, i, num in data)
+                                     * num for _, i, num in image_stacks)
     #print "Overlap splits %r, Image Size (%d,%d),
     #Overlapped Size (%d,%d)"  % (splits,iw,ih,pad_w,pad_h)
-    convolution = numpy.fft.irfft2(numpy.fft.rfft2(overlapped_image) *
-                                   numpy.fft.rfft2(bin_template[::-1, ::-1],
-                                                   overlapped_image.shape))
+
+    # Calculate the convolution of the FFT's of the overlapped image & template
+    convolution_freqs = (rfft2(overlapped_image) *
+                         rfft2(bin_template[::-1, ::-1],
+                               overlapped_image.shape))
+
+    # Reverse the FFT to find the result overlapped image
+    convolution_image = irfft2(convolution_freqs)
+
     results = set()
-    for (x, y), _, num in data[::-1]:
-        test = convolution / num
+    for (x, y), _, num in image_stacks[::-1]:
+        test = convolution_image / num
         filterd = ((test >= (count - tollerance)) &
                    (test <= (count + tollerance)))
         for (fy, fx) in numpy.transpose(numpy.nonzero(filterd)):
             results.add((x + fx - tw, y + fy - th))
-        convolution %= num
+        convolution_image %= num
     return list(results)
 
 
