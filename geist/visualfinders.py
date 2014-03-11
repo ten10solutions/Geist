@@ -50,7 +50,7 @@ class ApproxTemplateFinder(object):
         bin_image = edge_image > 10
         bin_template = edge_template > 10
         for x, y in best_convolution(bin_template, bin_image):
-            yield Location(x + 1, y + 1, w, h, image=image)
+            yield Location(x + 1, y + 1, w, h, parent=in_location)
 
     def __repr__(self):
         return "match %r approximately" % (self.template, )
@@ -94,7 +94,7 @@ class ThresholdTemplateFinder(object):
         bin_image = edge_image > 0
         bin_template = edge_template > 0
         for x, y in best_convolution(bin_template, bin_image):
-            yield Location(x + 1, y + 1, w, h, image=image)
+            yield Location(x + 1, y + 1, w, h, parent=in_location)
 
     def __repr__(self):
         return "match %r using threshold %r" % (self.template, self.threshold)
@@ -123,7 +123,7 @@ class BinaryRegionFinder(object):
                 y_slice.start,
                 x_slice.stop - x_slice.start,
                 y_slice.stop - y_slice.start,
-                image=image
+                parent=in_location
             )
 
 
