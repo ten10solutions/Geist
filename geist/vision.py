@@ -121,8 +121,12 @@ def convolution(bin_template, bin_image, tollerance=0.5):
     # saw matches
     found_bitmap = ((convolution_image > (expected - tollerance)) &
                     (convolution_image < (expected + tollerance)))
-    return [((fx - tw), (fy - th)) for (fy, fx)
-            in numpy.transpose(numpy.nonzero(found_bitmap))]
+
+    match_point = numpy.transpose(numpy.nonzero(found_bitmap))  # bottom right
+
+    # Find the top left point from the template (remember match_point is
+    # inside the template (hence -1)
+    return [((fx - (tw - 1)), (fy - (th - 1))) for (fy, fx) in match_point]
 
 
 def overlapped_convolution(bin_template, bin_image,
@@ -171,7 +175,7 @@ def overlapped_convolution(bin_template, bin_image,
         filterd = ((test >= (count - tollerance)) &
                    (test <= (count + tollerance)))
         for (fy, fx) in numpy.transpose(numpy.nonzero(filterd)):
-            results.add((x + fx - tw, y + fy - th))
+            results.add((x + fx - (tw - 1), y + fy - (th - 1)))
         convolution_image %= num
     return list(results)
 
