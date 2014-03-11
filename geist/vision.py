@@ -97,6 +97,9 @@ def best_convolution(bin_template, bin_image,
 def convolution(bin_template, bin_image, tollerance=0.5):
     expected = numpy.count_nonzero(bin_template)
     ih, iw = bin_image.shape
+    th, tw = bin_template.shape
+
+    # Padd image to even dimensions
     if ih % 2 or iw % 2:
         if ih % 2:
             ih += 1
@@ -105,13 +108,18 @@ def convolution(bin_template, bin_image, tollerance=0.5):
         bin_image = pad_bin_image_to_shape(bin_image, (ih, iw))
     if expected == 0:
         return []
-    convolution_image = irfft2(rfft2(bin_image) *
-                               rfft2(bin_template[::-1, ::-1],
-                                     bin_image.shape))
-    h, w = bin_template.shape
+
+    # Calculate the convolution of the FFT's of the image & template
+    convolution_freqs = rfft2(bin_image) * rfft2(bin_template[::-1, ::-1],
+                                                 bin_image.shape)
+    # Reverse the FFT to find the result image
+    convolution_image = irfft2(convolution_freqs)
+
+    # The areas in the result image within expected +- tollerance are where we
+    # saw matches
     found_bitmap = ((convolution_image > (expected - tollerance)) &
                     (convolution_image < (expected + tollerance)))
-    return [((fx - w), (fy - h)) for (fy, fx)
+    return [((fx - tw), (fy - th)) for (fy, fx)
             in numpy.transpose(numpy.nonzero(found_bitmap))]
 
 
