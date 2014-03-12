@@ -135,6 +135,15 @@ def convolution(bin_template, bin_image, tollerance=0.5):
 
 def overlapped_convolution(bin_template, bin_image,
                            tollerance=0.5, splits=(4, 2)):
+    """
+    As each of these images are hold only binary values, and RFFT2 works on
+    float64 greyscale values, we can make the convolution more efficient by
+    breaking the image up into :splits: sectons. Each one of these sections
+    then has its greyscale value adjusted and then stacked.
+
+    We then apply the convolution to this 'stack' of images, and adjust the
+    resultant position matches.
+    """
     th, tw = bin_template.shape
     ih, iw = bin_image.shape
     hs, ws = splits
@@ -172,6 +181,8 @@ def overlapped_convolution(bin_template, bin_image,
 
     # Reverse the FFT to find the result overlapped image
     convolution_image = irfft2(convolution_freqs)
+    # At this point, the maximum point in convolution_image should be the
+    # bottom right (why?) of the area of greatest match
 
     results = set()
     for (x, y), _, num in image_stacks[::-1]:
