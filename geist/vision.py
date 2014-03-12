@@ -48,8 +48,10 @@ OVERLAP_TABLE = {
     3: (3, 1),
     2: (2, 1)
 }
+
 # A number near float max which we don't want to get near to keep precision
-ACCURACY_LIMIT = 2 ** (64 - 22)
+# If you get false matches consider reducing this number.
+ACCURACY_LIMIT = 2 ** (64 - 23)
 
 
 def best_convolution(bin_template, bin_image,
