@@ -13,10 +13,11 @@ class TestSortingFinder(unittest.TestCase):
         self.gui = GUI(GeistFakeBackend())
 
     def test_sort(self):
-        self.locs = LocationList([Location(0, 0, w=10, h=10),
-                                  Location(0, 1, w=10, h=10),
-                                  Location(0, -5, w=10, h=10),
-                                  Location(0, 1, w=10, h=10)])
+        screen = self.gui.capture_locations()[0]
+        self.locs = LocationList([Location(0, 0, w=10, h=10, parent=screen),
+                                  Location(0, 8, w=10, h=10, parent=screen),
+                                  Location(0, 2, w=10, h=10, parent=screen),
+                                  Location(6, 8, w=10, h=10, parent=screen)])
         self.key = lambda loc: loc.y
         expected = sorted(self.locs, key=self.key)
         finder = SortingFinder(self.locs, key=self.key)
