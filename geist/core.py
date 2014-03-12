@@ -40,7 +40,7 @@ class Location(object):
             if ih != h or iw != w:
                 raise AssertionError('image width and height should be the '
                                      'same as the locations')
-            self._image = image
+        self._image = image
 
     @property
     def parent(self):
@@ -101,7 +101,7 @@ class Location(object):
     def copy(self, **update_attrs):
         attrs = dict(
             (attr, getattr(self, attr)) for attr in
-            ['x', 'y', 'w', 'h', 'main_point_offset', 'parent']
+            ['rel_x', 'rel_y', 'w', 'h', 'main_point_offset', 'parent']
         )
         attrs['image'] = self._image
         attrs.update(update_attrs)
