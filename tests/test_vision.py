@@ -34,6 +34,32 @@ class TestOverlappedConvolution(unittest.TestCase):
         actual = overlapped_convolution(template, image)
         self.assertEquals(sorted(expected), sorted(actual))
 
+    def test_edge_overlap(self):
+        """
+        When an image is split and reconstructed such that image parts combine
+        to appear like the template, we can get false positives in strange
+        places.
+        """
+        image = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                          [1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+                          [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                          [1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
+        template = np.array([[1, 1, 1],
+                             [0, 1, 0],
+                             [1, 1, 1]])
+
+        expected = []
+        actual = overlapped_convolution(template, image)
+        self.assertEquals(sorted(expected), sorted(actual))
+
 
 class TestConvolution(unittest.TestCase):
     def test_no_match(self):
