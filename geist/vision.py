@@ -155,6 +155,7 @@ def overlapped_convolution(bin_template, bin_image,
     assert count > 0
     assert h >= th
     assert w >= tw
+
     yoffset = [(i * h, ((i + 1) * h) + (th - 1)) for i in range(hs)]
     xoffset = [(i * w, ((i + 1) * w) + (tw - 1)) for i in range(ws)]
 
@@ -193,6 +194,8 @@ def overlapped_convolution(bin_template, bin_image,
                    (test <= (count + tollerance)))
         match_points = numpy.transpose(numpy.nonzero(filtered))  # bottom right
         for (fy, fx) in match_points:
+            if fx < (tw - 1) or fy < (th - 1):
+                continue
             results.add((x + fx - (tw - 1), y + fy - (th - 1)))
         convolution_image %= num
     return list(results)
