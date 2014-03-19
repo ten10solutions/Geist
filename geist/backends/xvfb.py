@@ -6,8 +6,9 @@ import time
 import os
 import shutil
 import struct
+from . import logger
 from ._x11_common import GeistXBase
-from geist.core import Location, LocationList
+from ..core import Location, LocationList
 
 
 class XwdToNumpyReader(object):
@@ -76,9 +77,9 @@ class GeistXvfbBackend(GeistXBase):
         return LocationList([Location(0, 0, w, h, image=image)])
 
     def close(self):
-        print("closing geist xvfb")
         GeistXBase.close(self)
         if hasattr(self, '_xvfb_proc'):
+            logger.info("closing geist xvfb")
             self._xvfb_proc.kill()
-            del self._xvfb_proc
             shutil.rmtree(self._display_dir, ignore_errors=True)
+            del self._xvfb_proc
