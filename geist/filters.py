@@ -64,6 +64,10 @@ class SliceFinderFilter(object):
         return SliceFinderFilter(self.finder, slice=slice(key, key + 1))
 
     def __repr__(self):
+        if self.slice is None:
+            return "<SliceFinderFilter %r>" % (self.finder,)
+        if self.slice.step is None:
+            return "%r[%d:%d]" % (self.finder, self.slice.start)
         return "%r[%d:%d:%s]" % (self.finder,
                                  self.slice.start, self.slice.stop,
                                  self.slice.step)
