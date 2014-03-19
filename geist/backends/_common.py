@@ -1,7 +1,6 @@
 import time
-import logging
+from . import logger
 
-logger = logging.getLogger(__name__)
 
 class _DesciptiveCallable(object):
     def __init__(self, doc, func):
@@ -70,6 +69,5 @@ class BackendActionBuilder(object):
 
     def execute(self):
         for action in self._actions:
-            logger.info(action)
+            logger.debug(action)
             action()
-

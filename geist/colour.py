@@ -21,6 +21,7 @@ GREEN = hsv(lambda h, s, v: ((h >= 48) & (h <= 112)) & (s > 128) & (v > 15))
 AQUA = hsv(lambda h, s, v: ((h >= 120) & (h <= 132)) & (s > 128) & (v > 15))
 BLUE = hsv(lambda h, s, v: ((h >= 132) & (h <= 200)) & (s > 128) & (v > 15))
 PURPLE = hsv(lambda h, s, v: ((h >= 200) & (h <= 216)) & (s > 128) & (v > 15))
+WHITE = hsv(lambda h, s, v: ((s < 5) & (v > 250)))
 
 
 def rgb(func):
