@@ -158,6 +158,7 @@ class max_vertical_separation(Operation):
 row_aligned = max_vertical_separation(0)
 column_aligned = max_horizontal_separation(0)
 intersects = row_aligned & column_aligned
+not_intersects = ~intersects
 
 
 class MergeLocationsFinderFilter(object):
