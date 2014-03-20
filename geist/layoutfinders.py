@@ -54,6 +54,9 @@ class Operation(object):
     def __or__(self, other):
         return _or(self, other)
 
+    def __invert__(self):
+        return _invert(self)
+
 
 class _and(Operation):
     def __init__(self, a_op, b_op):
@@ -75,6 +78,16 @@ class _or(Operation):
 
     def __repr__(self):
         return "%r or %r" % (self.a_op, self.b_op)
+
+class _invert(Operation):
+    def __init__(self, a_op):
+        self.a_op = a_op
+
+    def __call__(self, a, b):
+        return self.a_op(a, b) ^ True
+
+    def __repr__(self):
+        return "invert %r" % (self.a_op)
 
 
 class _SimpleOperation(Operation):
