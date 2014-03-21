@@ -54,6 +54,9 @@ class Operation(object):
     def __or__(self, other):
         return _or(self, other)
 
+    def __invert__(self):
+        return _invert(self)
+
 
 class _and(Operation):
     def __init__(self, a_op, b_op):
@@ -77,6 +80,17 @@ class _or(Operation):
         return "%r or %r" % (self.a_op, self.b_op)
 
 
+class _invert(Operation):
+    def __init__(self, a_op):
+        self.a_op = a_op
+
+    def __call__(self, a, b):
+        return self.a_op(a, b) ^ True
+
+    def __repr__(self):
+        return "invert %r" % (self.a_op)
+
+
 class _SimpleOperation(Operation):
     def __init__(self, op_func, doc):
         self.op_func, self.doc = op_func, doc
@@ -87,22 +101,11 @@ class _SimpleOperation(Operation):
     def __repr__(self):
         return self.doc
 
-below = _SimpleOperation(
-    lambda a, b: b.y + b.h <= a.y,
-    "is below"
-)
-above = _SimpleOperation(
-    lambda a, b: b.y >= (a.y + a.h),
-    "is above"
-)
-left_of = _SimpleOperation(
-    lambda a, b: b.x + b.w >= a.x,
-    "is left of"
-)
-right_of = _SimpleOperation(
-    lambda a, b: b.x <= (a.x + a.w),
-    "is right of"
-)
+below = _SimpleOperation(lambda a, b: b.y + b.h <= a.y, "is below")
+above = _SimpleOperation(lambda a, b: b.y >= (a.y + a.h), "is above")
+left_of = _SimpleOperation(lambda a, b: b.x + b.w >= a.x, "is left of")
+right_of = _SimpleOperation(lambda a, b: b.x <= (a.x + a.w), "is right of")
+
 
 class max_horizontal_separation(Operation):
     def __init__(self, max_sep):
@@ -145,6 +148,7 @@ class max_vertical_separation(Operation):
 row_aligned = max_vertical_separation(0)
 column_aligned = max_horizontal_separation(0)
 intersects = row_aligned & column_aligned
+not_intersects = ~intersects
 
 
 class MergeLocationsFinderFilter(object):

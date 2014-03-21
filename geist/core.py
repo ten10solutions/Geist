@@ -5,6 +5,7 @@ import logging
 from hamcrest import (
     has_length, greater_than_or_equal_to, less_than_or_equal_to)
 from hamcrest.core.string_description import tostring as describe_to_string
+import numpy
 from .keyboard import KeyDown, KeyUp, KeyDownUp, keyboard_layout_factory
 
 
@@ -53,8 +54,8 @@ class Location(object):
                 "Can not get image from Locations with zero width or height"
             )
         if self.parent is not None:
-            return self.parent.image[self.rel_y:self.rel_y+self.h,
-                                     self.rel_x:self.rel_x+self.w]
+            return self.parent.image[self.rel_y:self.rel_y + self.h,
+                                     self.rel_x:self.rel_x + self.w]
         if self._image is not None:
             return self._image
         else:
@@ -141,6 +142,8 @@ class Location(object):
             )
 
     def __eq__(self, other):
+        if self.parent != other.parent:
+            return False
         if self.x != other.x or self.y != other.y:
             return False
         if self.w != other.w or self.h != other.h:
@@ -320,4 +323,3 @@ class GUI(object):
             return True
         except NotFoundError:
             return False
-
