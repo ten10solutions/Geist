@@ -142,6 +142,8 @@ class Location(object):
             )
 
     def __eq__(self, other):
+        if self.parent != other.parent:
+            return False
         if self.x != other.x or self.y != other.y:
             return False
         if self.w != other.w or self.h != other.h:
