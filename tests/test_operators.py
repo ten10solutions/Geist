@@ -6,6 +6,7 @@ from tests import logger as base_logger
 
 logger = base_logger.getChild('operators')
 
+
 class TestOperators(unittest.TestCase):
     def setUp(self):
         self.gui = GUI(GeistFakeBackend())
@@ -19,7 +20,8 @@ class TestOperators(unittest.TestCase):
     def test_and(self):
         below_and_left = below & left_of
         expected = [Location(0, 24, w=5, h=5, parent=self.screen)]
-        finder =  LocationOperatorFinder(self.locs_b, below_and_left, self.locs_a)
+        finder = LocationOperatorFinder(self.locs_b, below_and_left,
+                                        self.locs_a)
         actual = self.gui.find_all(finder)
         self.assertListEqual(actual, expected)
 
@@ -27,17 +29,17 @@ class TestOperators(unittest.TestCase):
         not_below = ~below
         expected = [Location(0, 2, w=5, h=5, parent=self.screen),
                     Location(22, 2, w=5, h=5, parent=self.screen)]
-        finder =  LocationOperatorFinder(self.locs_b, not_below, self.locs_a)
+        finder = LocationOperatorFinder(self.locs_b, not_below, self.locs_a)
         actual = self.gui.find_all(finder)
         self.assertListEqual(actual, expected)
-
 
     def test_or(self):
         below_or_left = below | left_of
         expected = [Location(0, 2, w=5, h=5, parent=self.screen),
                     Location(0, 24, w=5, h=5, parent=self.screen),
                     Location(22, 24, w=5, h=5, parent=self.screen)]
-        finder =  LocationOperatorFinder(self.locs_b, below_or_left, self.locs_a)
+        finder = LocationOperatorFinder(self.locs_b, below_or_left,
+                                        self.locs_a)
         actual = self.gui.find_all(finder)
         self.assertListEqual(actual, expected)
 

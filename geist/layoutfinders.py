@@ -79,6 +79,7 @@ class _or(Operation):
     def __repr__(self):
         return "%r or %r" % (self.a_op, self.b_op)
 
+
 class _invert(Operation):
     def __init__(self, a_op):
         self.a_op = a_op
@@ -100,22 +101,11 @@ class _SimpleOperation(Operation):
     def __repr__(self):
         return self.doc
 
-below = _SimpleOperation(
-    lambda a, b: b.y + b.h <= a.y,
-    "is below"
-)
-above = _SimpleOperation(
-    lambda a, b: b.y >= (a.y + a.h),
-    "is above"
-)
-left_of = _SimpleOperation(
-    lambda a, b: b.x + b.w >= a.x,
-    "is left of"
-)
-right_of = _SimpleOperation(
-    lambda a, b: b.x <= (a.x + a.w),
-    "is right of"
-)
+below = _SimpleOperation(lambda a, b: b.y + b.h <= a.y, "is below")
+above = _SimpleOperation(lambda a, b: b.y >= (a.y + a.h), "is above")
+left_of = _SimpleOperation(lambda a, b: b.x + b.w >= a.x, "is left of")
+right_of = _SimpleOperation(lambda a, b: b.x <= (a.x + a.w), "is right of")
+
 
 class max_horizontal_separation(Operation):
     def __init__(self, max_sep):
