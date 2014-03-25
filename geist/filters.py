@@ -67,7 +67,7 @@ class SliceFinderFilter(object):
         if self.slice is None:
             return "<SliceFinderFilter %r>" % (self.finder,)
         if self.slice.step is None:
-            return "%r[%d:%d]" % (self.finder, self.slice.start)
+            return "%r[%d:%d]" % (self.finder, self.slice.start, self.slice.stop)
         return "%r[%d:%d:%s]" % (self.finder,
                                  self.slice.start, self.slice.stop,
                                  self.slice.step)
