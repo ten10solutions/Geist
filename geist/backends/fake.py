@@ -3,9 +3,16 @@ from ..core import Location
 
 
 class GeistFakeBackend(object):
-    def __init__(self, w=800, h=600):
-        self.image = np.zeros((h, w, 3))
-        self.locations = [Location(0, 0, w=w, h=h, image=self.image)]
+    def __init__(self, image=None, w=800, h=600):
+        if image is None:
+            self.image = np.zeros((h, w, 3))
+            self.locations = [Location(0, 0, w=w, h=h, image=self.image)]
+        else:
+            if isinstance(image, basestring):
+                image = np.load(image)
+            self.image = image
+            h, w, _ = image.shape
+            self.locations = [Location(0, 0, w=w, h=h, image=self.image)]
 
     def create_process(self, command):
         pass
