@@ -44,7 +44,12 @@ class XwdToNumpyReader(object):
 class GeistXvfbBackend(GeistXBase):
     _FB_OFFSET = 3232
 
-    def __init__(self, display_num, width=1280, height=1024):
+    def __init__(self, **kwargs):
+   # display_num, width=1280, height=1024):
+        display_num = kwargs.get('display_num', 2)
+        width = kwargs.get('width')
+        height = kwargs.get('height')
+
         display = ":%d" % (display_num, )
         self._display_dir = '/var/tmp/Xvfb_display%d' % (display_num,)
         os.makedirs(self._display_dir, 0700)

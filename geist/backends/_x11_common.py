@@ -40,7 +40,9 @@ class GeistXBase(object):
     KEY_NAME_TO_CODE_IGNORE_CASE = {name.lower(): value
                                     for name, value in keysyms.iteritems()}
 
-    def __init__(self, display=':0'):
+    def __init__(self, **kwargs):
+        display = kwargs.get('display', ':0')
+
         self._display = display
         self._conn = ooxcb.connect(display)
         self._root = self._conn.setup.roots[self._conn.pref_screen].root
