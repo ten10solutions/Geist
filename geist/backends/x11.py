@@ -23,7 +23,8 @@ def _bit_c_to_byte(bit_cs):
 
 
 class GeistXBackend(GeistXBase):
-    def __init__(self, display=':0'):
+    def __init__(self, **kwargs):
+        display = kwargs.get('display', ':0')
         GeistXBase.__init__(self, display=display)
 
     def capture_locations(self):

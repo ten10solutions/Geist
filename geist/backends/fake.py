@@ -3,7 +3,11 @@ from ..core import Location
 
 
 class GeistFakeBackend(object):
-    def __init__(self, image=None, w=800, h=600):
+    def __init__(self, **kwargs):
+        image = kwargs.get('image')
+        w = kwargs.get('w', 800)
+        h = kwargs.get('h', 600)
+
         if image is None:
             self.image = np.zeros((h, w, 3))
             self.locations = [Location(0, 0, w=w, h=h, image=self.image)]

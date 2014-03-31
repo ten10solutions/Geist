@@ -82,7 +82,7 @@ class GeistWindowsBackend(object):
     SM_CXVIRTUALSCREEN, SM_CYVIRTUALSCREEN = 78, 79
     BITSPIXEL = 12
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         self._mouse = _Mouse()
         self._keyboard = _KeyBoard()
 
