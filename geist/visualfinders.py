@@ -50,7 +50,7 @@ class ApproxTemplateFinder(object):
         bin_image = edge_image > 10
         bin_template = edge_template > 10
         for x, y in best_convolution(bin_template, bin_image):
-            yield Location(x + 1, y + 1, w, h, parent=in_location)
+            yield Location(x, y, w, h, parent=in_location)
 
     def __repr__(self):
         return "match %r approximately" % (self.template, )
