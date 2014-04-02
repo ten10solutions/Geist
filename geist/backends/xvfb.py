@@ -45,10 +45,9 @@ class GeistXvfbBackend(GeistXBase):
     _FB_OFFSET = 3232
 
     def __init__(self, **kwargs):
-   # display_num, width=1280, height=1024):
         display_num = kwargs.get('display_num', 2)
-        width = kwargs.get('width')
-        height = kwargs.get('height')
+        width = kwargs.get('width', 1280)
+        height = kwargs.get('height', 1024)
 
         display = ":%d" % (display_num, )
         self._display_dir = '/var/tmp/Xvfb_display%d' % (display_num,)
