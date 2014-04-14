@@ -7,8 +7,9 @@ from ooxcb.protocol import (
 )
 
 from operator import attrgetter
-from ._x11_common import GeistXBase
 from geist.core import Location, LocationList
+from ._x11_common import GeistXBase
+from . import logger
 
 
 xproto.mixin()
@@ -26,6 +27,7 @@ class GeistXBackend(GeistXBase):
     def __init__(self, **kwargs):
         display = kwargs.get('display', ':0')
         GeistXBase.__init__(self, display=display)
+        logger.info("Created GeistXBackend")
 
     def capture_locations(self):
         geometry_getter = attrgetter('x', 'y', 'width', 'height')

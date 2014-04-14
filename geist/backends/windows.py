@@ -22,8 +22,9 @@ from ctypes.wintypes import (
     LONG,
     WORD
 )
-from ._common import BackendActionBuilder
 from geist.core import Location, LocationList
+from ._common import BackendActionBuilder
+from . import logger
 
 
 class _ActionsTransaction(object):
@@ -85,6 +86,7 @@ class GeistWindowsBackend(object):
     def __init__(self, **kwargs):
         self._mouse = _Mouse()
         self._keyboard = _KeyBoard()
+        logger.info("Created GeistWindowsBackend")
 
     def create_process(self, command):
         dev_null = open('NUL', 'w')
