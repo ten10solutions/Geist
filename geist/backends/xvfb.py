@@ -80,6 +80,7 @@ class GeistXvfbBackend(GeistXBase):
         time.sleep(1)
         GeistXBase.__init__(self, display=display)
         self._xwd_reader = XwdToNumpyReader(fb_filepath)
+        logger.info("Started Xvfb with file in %s", self._display_dir)
 
     def _find_display(self):
         """
