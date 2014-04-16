@@ -12,11 +12,11 @@ setup(
     version=__version__,
     packages=['geist', 'geist.backends'],
     install_requires=[
-        'numpy==1.7.1',
-        'scipy>=0.13.0',
-        'ooxcb>=1.2',
-        'PyHamcrest>=1.8.0',
-        'pillow>=2.3.0'
+        'numpy',
+        'scipy',
+        'ooxcb',
+        'PyHamcrest',
+        'pillow'
     ],
     description='Visual Automation Library',
     classifiers=[
