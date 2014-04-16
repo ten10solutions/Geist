@@ -1,17 +1,10 @@
 language: python
-
 python:
   - "2.7"
-
 virtualenv:
   system_site_packages: true
-
 before_install:
-  - sudo apt-get install -qq python-numpy python-scipy
-
-# command to install dependencies, we install numpy first cause its a pain
+ - sudo apt-get install -qq python-numpy python-scipy
 install:
-  - python setup.py develop
-
-# command to run tests, e.g. python setup.py test
+ - python setup.py develop
 script: python setup.py test
