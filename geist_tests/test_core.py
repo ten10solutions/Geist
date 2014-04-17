@@ -3,7 +3,7 @@ import numpy as np
 from numpy.testing import assert_array_equal
 
 from geist.core import Location
-from tests import logger as base_logger
+from geist_tests import logger as base_logger
 
 logger = base_logger.getChild('filters')
 

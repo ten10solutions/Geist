@@ -5,7 +5,7 @@ from geist.vision import (best_convolution,
                           convolution, overlapped_convolution,
                           pad_bin_image_to_shape)
 
-from tests import logger as base_logger
+from geist_tests import logger as base_logger
 
 logger = base_logger.getChild('vision')
 
