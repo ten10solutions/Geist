@@ -1,5 +1,6 @@
 import unittest
 import numpy as np
+from numpy.testing import assert_array_equal
 
 from geist.core import Location
 from tests import logger as base_logger
@@ -30,7 +31,7 @@ class TestLocation(unittest.TestCase):
                           [0, 1, 0, 0, 0, 0, 0, 0],
                           [0, 0, 0, 0, 0, 0, 0, 0]])
         loc = Location(0, 0, w=8, h=8, image=image)
-        self.assertEquals(loc)
+        assert_array_equal(loc.image, image)
 
     def test_image_no_dims(self):
         image = np.array([[0, 0, 0, 0, 0, 0, 0, 0],
@@ -49,6 +50,56 @@ class TestLocation(unittest.TestCase):
         loc = Location(0, 0, parent=parent)
         self.assertEquals(loc.parent, parent)
 
+    def test_parent_x(self):
+        image = np.array([[0, 0, 0, 0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 1, 0],
+                          [0, 0, 0, 0, 0, 1, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 0, 0],
+                          [0, 0, 1, 0, 0, 0, 0, 0],
+                          [0, 1, 0, 0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 0, 0]])
+        parent = Location(0, 0, w=8, h=8, image=image)
+        loc = Location(2, 2, parent=parent)
+        self.assertEquals(loc.x, 2)
+
+    def test_parent_y(self):
+        image = np.array([[0, 0, 0, 0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 1, 0],
+                          [0, 0, 0, 0, 0, 1, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 0, 0],
+                          [0, 0, 1, 0, 0, 0, 0, 0],
+                          [0, 1, 0, 0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 0, 0]])
+        parent = Location(0, 0, w=8, h=8, image=image)
+        loc = Location(2, 2, parent=parent)
+        self.assertEquals(loc.y, 2)
+
+    def test_copy(self):
+        image = np.array([[0, 0, 0, 0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 1, 0],
+                          [0, 0, 0, 0, 0, 1, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 0, 0],
+                          [0, 0, 1, 0, 0, 0, 0, 0],
+                          [0, 1, 0, 0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 0, 0]])
+        loc = Location(0, 0, w=8, h=8, image=image)
+        copy = loc.copy(rel_x=7)
+        self.assertEquals(copy.x, 7)
+
+    def test_area(self):
+        image = np.array([[0, 0, 0, 0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 1, 0],
+                          [0, 0, 0, 0, 0, 1, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 0, 0],
+                          [0, 0, 1, 0, 0, 0, 0, 0],
+                          [0, 1, 0, 0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 0, 0]])
+        loc = Location(0, 0, w=8, h=8, image=image)
+        self.assertEqual(loc.area, 64)
 
 location_suite = unittest.TestLoader().loadTestsFromTestCase(TestLocation)
 all_tests = unittest.TestSuite([location_suite])
