@@ -72,8 +72,4 @@ def rgb_to_hsv(image):
     return hue, sat, val
 
 
-__all__ = """filter
-hsv
-rgb
-rgb_to_hsv
-""".split()
+__all__ = ["filter", "hsv", "rgb", "rgb_to_hsv"]
