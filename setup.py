@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 from setuptools import setup
-from glob import glob
 import os
 
 with open(os.path.join('geist','version.py')) as f:
@@ -16,7 +15,7 @@ setup(
         'numpy>=1.7.0',
         'scipy',
         'ooxcb',
-        'pyhamcrest',
+        'PyHamcrest',
         'pillow',
         'wrapt'
     ],
@@ -33,5 +32,5 @@ setup(
     author='The Test People Limited',
     maintainer='Tony Simpson',
     url='https://github.com/thetestpeople/Geist',
-    test_suite="tests",
+    test_suite="geist_tests",
 )
