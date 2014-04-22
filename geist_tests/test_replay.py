@@ -9,8 +9,7 @@ from geist.backends.replay import (
     geist_replay,
     _RECORD_MODE_ENV_VAR_VALUE,
 )
-from _common import logger as base_logger
-import os
+from ._common import logger as base_logger
 
 _DIR = os.path.split(os.path.abspath(__file__))[0]
 
