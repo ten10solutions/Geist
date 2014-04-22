@@ -2,7 +2,7 @@ import unittest
 from geist import Location, LocationList, GUI, LocationOperatorFinder
 from geist.backends.fake import GeistFakeBackend
 from geist.layoutfinders import below, left_of, right_of
-from tests import logger as base_logger
+from _common import logger as base_logger
 
 logger = base_logger.getChild('operators')
 

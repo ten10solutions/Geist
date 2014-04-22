@@ -1,9 +1,9 @@
+from __future__ import division, absolute_import, print_function
 import unittest
 from geist import Location, LocationList, GUI
 from geist.backends.fake import GeistFakeBackend
 from geist.filters import SortingFinder
-
-from tests import logger as base_logger
+from _common import logger as base_logger
 
 logger = base_logger.getChild('filters')
 

@@ -144,9 +144,8 @@ class Location(object):
     def __eq__(self, other):
         if self.parent != other.parent:
             return False
-        if self.x != other.x or self.y != other.y:
-            return False
-        if self.w != other.w or self.h != other.h:
+        if ((self.rel_x, self.rel_y, self.w, self.h) !=
+            (other.rel_x, other.rel_y, other.w, other.h)):
             return False
         if self.main_point_offset != other.main_point_offset:
             return False

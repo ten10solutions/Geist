@@ -17,7 +17,8 @@ setup(
         'scipy',
         'ooxcb',
         'pyhamcrest',
-        'pillow'
+        'pillow',
+        'wrapt'
     ],
     description='Visual Automation Library',
     classifiers=[
