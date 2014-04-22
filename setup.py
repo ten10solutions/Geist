@@ -31,5 +31,5 @@ setup(
     author='The Test People Limited',
     maintainer='Tony Simpson',
     url='https://github.com/thetestpeople/Geist',
-    test_suite="tests",
+    test_suite="geist_tests",
 )
