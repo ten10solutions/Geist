@@ -5,4 +5,4 @@ virtualenv:
   system_site_packages: true
 before_install: sudo apt-get install -qq python-numpy python-scipy
 install: python setup.py develop
-script: python tests/__init__.py
+script: python geist_tests/__init__.py
