@@ -5,6 +5,6 @@ virtualenv:
   system_site_packages: true
 before_install: 
   - sudo apt-get install -qq python-numpy python-scipy
-  - sudo easy_install -U distribute
+  - sudo easy_install -U setuptools
 install: python setup.py develop
 script: python setup.py test
