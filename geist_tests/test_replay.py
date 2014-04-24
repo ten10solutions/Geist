@@ -1,7 +1,7 @@
 from __future__ import division, absolute_import, print_function
 import os
 import unittest
-from geist import Location, LocationList, GUI
+from geist import Location, GUI
 from geist.backends.fake import GeistFakeBackend
 from geist.backends.replay import (
     RecordingBackend,
@@ -17,7 +17,8 @@ class EnvironmentContext(object):
         self._env = env
 
     def __enter__(self):
-        self._old_env = dict((k, os.environ[k]) for k in self._env.keys() if k in os.environ)
+        self._old_env = dict((k, os.environ[k]) for k in self._env.keys()
+                             if k in os.environ)
         os.environ.update(self._env)
 
     def __exit__(self, *args, **kwargs):
@@ -28,9 +29,8 @@ class EnvironmentContext(object):
 class TestReplay(unittest.TestCase):
     def test_replay_capture_works(self):
         capture_file = os.path.join(
-                _DIR,
-                'test_replay_capture_works.log'
-        )
+            _DIR,
+            'test_replay_capture_works.log')
         backend = RecordingBackend(
             source_backend=GeistFakeBackend(),
             recording_filename=capture_file
@@ -52,11 +52,10 @@ class TestReplay(unittest.TestCase):
             recording_filename=capture_file
         )
         gui = GUI(backend)
-        gui.click(Location(10,10))
+        gui.click(Location(10, 10))
         backend = PlaybackBackend(recording_filename=capture_file)
         gui = GUI(backend)
-        gui.click(Location(10,10))
-
+        gui.click(Location(10, 10))
 
     def test_keyboard_works(self):
         capture_file = os.path.join(
