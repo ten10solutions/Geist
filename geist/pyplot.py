@@ -54,10 +54,10 @@ class Viewer(object):
         vmin = val.min()
         vmax = val.max()
         return hsv(lambda h, s, v: (
-        (h >= hmin) & (h <= hmax)) &
-        ((s >= smin) & (s <= smax)) &
-        ((v >= vmin) & (v <= vmax)))
+            (h >= hmin) & (h <= hmax)) &
+            ((s >= smin) & (s <= smax)) &
+            ((v >= vmin) & (v <= vmax)))
  
 
     def get_colour(self):
-        self._get_colour(self.visible())
+        return self._get_colour(self.visible())
