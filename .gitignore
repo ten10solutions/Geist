@@ -1,5 +1,8 @@
 *.py[cod]
 
+# Geist specific
+geist_tests/*.log
+
 # C extensions
 *.so
 

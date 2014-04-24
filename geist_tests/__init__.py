@@ -1,4 +1,3 @@
-import logging
 import unittest
 from test_colour import all_tests as all_colour
 from test_core import all_tests as all_core
