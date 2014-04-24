@@ -8,7 +8,7 @@ from geist.pyplot import Viewer
 
 class TestViewer(unittest.TestCase):
     def setUp(self):
-        self.repo = DirectoryRepo(pkg_resources.resource_filename('geist', '../test/test_repo'))
+        self.repo = DirectoryRepo('test_repo')
         self.gui = GUI(GeistFakeBackend(image=np.array([[[255,0,0],[240,10,10],[0,255,0],[0,0,255]]])))
         self.V = Viewer(self.gui, self.repo)
         self.screen = self.gui.capture_locations()[0]
