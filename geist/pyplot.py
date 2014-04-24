@@ -1,5 +1,6 @@
 from itertools import cycle
 from matplotlib.pyplot import cm, figure, gcf, imshow
+from geist.colour import rgb_to_hsv, hsv
 import numpy
 
 
@@ -43,3 +44,20 @@ class Viewer(object):
                 image[l.y:l.y + l.h, l.x:l.x + l.w, :] *= 0.75
                 image[l.y:l.y + l.h, l.x:l.x + l.w, c] = 255
             imshow(image, interpolation='none')
+    
+    def _get_colour(self, numpy_array):
+        hue, sat, val = rgb_to_hsv(numpy_array)
+        hmin = hue.min()
+        hmax = hue.max()
+        smin = sat.min()
+        smax = sat.max()
+        vmin = val.min()
+        vmax = val.max()
+        return hsv(lambda h, s, v: (
+            (h >= hmin) & (h <= hmax)) &
+            ((s >= smin) & (s <= smax)) &
+            ((v >= vmin) & (v <= vmax)))
+ 
+
+    def get_colour(self):
+        return self._get_colour(self.visible())
