@@ -18,7 +18,7 @@ display.
 
 Example:
 
-```
+``` python
 from geist import DirectoryRepo
 
 repo = DirectoryRepo('root_folder/folder/geist_repo')
@@ -34,7 +34,7 @@ number 2 to start the Xvfb backend on screen number 2.
 
 Example:
 
-```
+``` python
 from geist.backends import get_platform_backend
 
 backend = get_platform_backend(screen_number)
@@ -49,7 +49,7 @@ initialised with a backend.
 
 Example:
 
-```
+``` python
 from geist import GUI
 
 gui = GUI(backend)
@@ -64,7 +64,7 @@ data. It is initialised with a gui and a repository.
 
 Example:
 
-```
+``` python
 from geist.pyplot import Viewer
 
 viewer = Viewer(gui, repository)
@@ -77,7 +77,7 @@ with the home button.
 
 Example:
 
-```
+``` python
 viewer.show_capture()
 ```
 
@@ -87,7 +87,7 @@ the name you want to save the image as.
 
 Example:
 
-```
+``` python
 viewer.save('image_name')
 ```
 
@@ -97,7 +97,7 @@ one result or many. It is called with the finder as an argument.
 
 Example:
 
-```
+``` python
 viewer.show_found(finder)
 ```
 
@@ -109,6 +109,6 @@ value and maximum h value with the same being true for s and v.
 
 Example:
 
-```
+``` python
 colour = viewer.get_colour()
 ```
