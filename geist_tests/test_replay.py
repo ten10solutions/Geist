@@ -1,7 +1,7 @@
 from __future__ import division, absolute_import, print_function
 import os
 import unittest
-from geist import Location, LocationList, GUI
+from geist import Location, GUI
 from geist.backends.fake import GeistFakeBackend
 from geist.backends.replay import (
     RecordingBackend,
@@ -9,11 +9,7 @@ from geist.backends.replay import (
     geist_replay,
     _RECORD_MODE_ENV_VAR_VALUE,
 )
-from ._common import logger as base_logger
-
 _DIR = os.path.split(os.path.abspath(__file__))[0]
-
-logger = base_logger.getChild('replay')
 
 
 class EnvironmentContext(object):
@@ -21,7 +17,8 @@ class EnvironmentContext(object):
         self._env = env
 
     def __enter__(self):
-        self._old_env = dict((k, os.environ[k]) for k in self._env.keys() if k in os.environ)
+        self._old_env = dict((k, os.environ[k]) for k in self._env.keys()
+                             if k in os.environ)
         os.environ.update(self._env)
 
     def __exit__(self, *args, **kwargs):
@@ -32,9 +29,8 @@ class EnvironmentContext(object):
 class TestReplay(unittest.TestCase):
     def test_replay_capture_works(self):
         capture_file = os.path.join(
-                _DIR,
-                'test_replay_capture_works.log'
-        )
+            _DIR,
+            'test_replay_capture_works.log')
         backend = RecordingBackend(
             source_backend=GeistFakeBackend(),
             recording_filename=capture_file
@@ -56,11 +52,10 @@ class TestReplay(unittest.TestCase):
             recording_filename=capture_file
         )
         gui = GUI(backend)
-        gui.click(Location(10,10))
+        gui.click(Location(10, 10))
         backend = PlaybackBackend(recording_filename=capture_file)
         gui = GUI(backend)
-        gui.click(Location(10,10))
-
+        gui.click(Location(10, 10))
 
     def test_keyboard_works(self):
         capture_file = os.path.join(
@@ -81,13 +76,12 @@ class TestReplay(unittest.TestCase):
     def _decorated_method(self, gui):
         gui.key_presses('abcd')
 
+    @unittest.skip("Need to mock get_platform_backend")
     def test_decorator(self):
         with EnvironmentContext(GEIST_REPLAY_MODE=_RECORD_MODE_ENV_VAR_VALUE):
             self._decorated_method()
         with EnvironmentContext(GEIST_REPLAY_MODE="playback"):
             self._decorated_method()
-
-
 
 
 replay_suite = unittest.TestLoader().loadTestsFromTestCase(TestReplay)

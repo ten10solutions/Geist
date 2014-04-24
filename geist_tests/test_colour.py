@@ -2,9 +2,6 @@ import unittest
 import numpy as np
 from numpy.testing import assert_array_equal
 from geist.colour import rgb_to_hsv
-from ._common import logger as base_logger
-
-logger = base_logger.getChild('colour')
 
 
 class TestColorSpaceMaps(unittest.TestCase):
