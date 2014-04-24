@@ -5,10 +5,6 @@ from geist import GUI, BinaryRegionFinder, Location, DirectoryRepo
 from geist.backends.fake import GeistFakeBackend
 from geist.pyplot import Viewer
 
-from tests import logger as base_logger
-
-logger = base_logger.getChild('viewer')
-
 
 class TestViewer(unittest.TestCase):
     def setUp(self):
