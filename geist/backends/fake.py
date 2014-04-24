@@ -1,5 +1,5 @@
 import numpy as np
-from ..core import Location
+from ..core import Location, LocationList
 
 
 class GeistFakeBackend(object):
@@ -9,14 +9,18 @@ class GeistFakeBackend(object):
         h = kwargs.get('h', 600)
 
         if image is None:
-            self.image = np.zeros((h, w, 3))
-            self.locations = [Location(0, 0, w=w, h=h, image=self.image)]
+            self.image = np.zeros((h, w, 3), dtype=np.ubyte)
+            self.locations = LocationList(
+                [Location(0, 0, w=w, h=h, image=self.image)]
+            )
         else:
             if isinstance(image, basestring):
                 image = np.load(image)
             self.image = image
             h, w, _ = image.shape
-            self.locations = [Location(0, 0, w=w, h=h, image=self.image)]
+            self.locations = LocationList(
+                [Location(0, 0, w=w, h=h, image=self.image)]
+            )
 
     def create_process(self, command):
         pass

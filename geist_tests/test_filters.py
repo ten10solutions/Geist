@@ -5,7 +5,7 @@ from geist.filters import (SortingFinder,
                            LocationFinderFilter,
                            SliceFinderFilter)
 
-from geist_tests import logger as base_logger
+from ._common import logger as base_logger
 
 logger = base_logger.getChild('filters')
 

@@ -3,7 +3,7 @@
 from setuptools import setup
 import os
 
-with open(os.path.join('geist', 'version.py')) as f:
+with open(os.path.join('geist','version.py')) as f:
     exec(f.read())
 
 
@@ -12,11 +12,12 @@ setup(
     version=__version__,
     packages=['geist', 'geist.backends'],
     install_requires=[
-        'numpy',
+        'numpy>=1.7.0',
         'scipy',
         'ooxcb',
         'PyHamcrest',
-        'pillow'
+        'pillow',
+        'wrapt'
     ],
     description='Visual Automation Library',
     classifiers=[
