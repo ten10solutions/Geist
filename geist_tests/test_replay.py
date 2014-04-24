@@ -9,11 +9,7 @@ from geist.backends.replay import (
     geist_replay,
     _RECORD_MODE_ENV_VAR_VALUE,
 )
-from ._common import logger as base_logger
-
 _DIR = os.path.split(os.path.abspath(__file__))[0]
-
-logger = base_logger.getChild('replay')
 
 
 class EnvironmentContext(object):
@@ -86,8 +82,6 @@ class TestReplay(unittest.TestCase):
             self._decorated_method()
         with EnvironmentContext(GEIST_REPLAY_MODE="playback"):
             self._decorated_method()
-
-
 
 
 replay_suite = unittest.TestLoader().loadTestsFromTestCase(TestReplay)

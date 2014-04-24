@@ -5,10 +5,6 @@ from geist.filters import (SortingFinder,
                            LocationFinderFilter,
                            SliceFinderFilter)
 
-from ._common import logger as base_logger
-
-logger = base_logger.getChild('filters')
-
 
 class TestLocationFinderFilter(unittest.TestCase):
     def setUp(self):

@@ -3,9 +3,6 @@ import numpy as np
 from numpy.testing import assert_array_equal
 
 from geist.core import Location
-from ._common import logger as base_logger
-
-logger = base_logger.getChild('filters')
 
 
 class TestLocation(unittest.TestCase):
