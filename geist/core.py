@@ -287,6 +287,47 @@ class GUI(object):
             actions.add_wait(self.config_mouse_move_wait)
             actions.add_button_up(1)
             actions.add_wait(self.config_mouse_button_wait)
+            
+            
+    def drag_incremental(self, from_finder, to_finder):
+        _from = self.wait_find_one(from_finder).main_point
+        to = self.wait_find_one(to_finder).main_point
+        _from = (int(_from[0]), int(_from[1]))
+        to = (int(to[0]), int(to[1]))
+        # calculate number of 50 pixel moves in the x direction
+        x_distance = to[0] - _from[0] 
+        y_distance = to[1] - _from[1] 
+        number_x_moves = x_distance/50
+        number_y_moves = y_distance/50
+        with self._backend.actions_transaction() as actions:
+                actions.add_move(_from)
+                actions.add_wait(self.config_mouse_move_wait)
+                actions.add_button_down(1)
+                if x_distance > 0:
+                    for i in range(number_x_moves):
+                        next_point = _from[0] + 50*i
+                        actions.add_move((next_point, _from[1]))
+                        actions.add_wait(self.config_mouse_button_wait)
+                else:
+                    for i in range(number_x_moves):
+                        next_point = _from[1] - 50*i
+                        actions.add_move((next_point, _from[1]))
+                        actions.add_wait(self.config_mouse_button_wait)
+                if y_distance > 0:
+                    for i in range(number_y_moves):
+                        next_point = _from[1] + 50*i
+                        actions.add_move((_from[0]+50*number_x_moves, next_point))
+                        actions.add_wait(self.config_mouse_button_wait)
+                else:
+                    for i in range(number_x_moves):
+                        next_point = _from[1] - 50*i
+                        actions.add_move((_from[0]+50*number_x_moves, next_point))
+                        actions.add_wait(self.config_mouse_button_wait)
+                actions.add_move(to)
+                actions.add_wait(self.config_mouse_move_wait)
+                actions.add_button_up(1)
+                actions.add_wait(self.config_mouse_button_wait)
+        
 
     def drag_relative(self, from_finder, offset):
         from_x, from_y = self.wait_find_one(from_finder)
