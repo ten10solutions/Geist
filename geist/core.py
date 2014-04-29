@@ -276,6 +276,8 @@ class GUI(object):
     def drag(self, from_finder, to_finder):
         _from = self.wait_find_one(from_finder).main_point
         to = self.wait_find_one(to_finder).main_point
+        _from = (int(_from[0]), int(_from[1]))
+        to = (int(to[0]), int(to[1]))
         with self._backend.actions_transaction() as actions:
             actions.add_move(_from)
             actions.add_wait(self.config_mouse_move_wait)
