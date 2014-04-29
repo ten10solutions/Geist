@@ -17,7 +17,8 @@ setup(
         'ooxcb',
         'PyHamcrest',
         'pillow',
-        'wrapt'
+        'wrapt',
+        'mock',
     ],
     description='Visual Automation Library',
     classifiers=[
