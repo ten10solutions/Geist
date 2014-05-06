@@ -27,6 +27,9 @@ class CouldDoBetterKeyboardLayout(object):
         '@': ('at', True),
         '&': ('ampersand', True),
         '-': ('minus', False),
+        ':': ('colon', True),
+        '\\': ('backslash', False),
+        '_':('underscore', True)
     }
 
     def __call__(self, char):
