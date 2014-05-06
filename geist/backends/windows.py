@@ -181,7 +181,11 @@ class _KeyBoard(object):
         'space': ' ',
         'tab': '\t',
         'period': '.',
-        'minus': '-'
+        'minus': '-',
+        'colon': ':',
+        'backslash': '\\',
+        'underscore': '_'
+
     }
 
     def _convert_keyname_to_virtual_key(self, name):
@@ -236,7 +240,7 @@ class _Mouse(object):
 
     def move(self, point):
         self._current_point = point
-        x, y = self._normalize_coords(point)        
+        x, y = self._normalize_coords(point)
         _USER32.SetCursorPos(*point)
 
     def scroll(lines):
