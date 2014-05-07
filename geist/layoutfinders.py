@@ -11,11 +11,6 @@ class FinderInFinder(object):
     def find(self, in_location):
         for location in self._in_finder.find(in_location):
             for sub_location in self._finder.find(location):
-                if (location.x, location.y) != (0, 0):
-                    sub_location = sub_location.copy(
-                        x=sub_location.x + location.x,
-                        y=sub_location.y + location.y
-                    )
                 yield sub_location
 
     def __repr__(self):
