@@ -9,7 +9,10 @@ class Viewer(object):
         self._gui = gui
         self._repo = repo
 
-    def save(self, name):
+    def save(self, name, force=False):
+        if name in self._repo.entries and force==False:
+            raise KeyError(
+                name + ' already exists, to overwrite, pass force=True')
         self._repo[name] = self.visible()
 
     def visible(self):
