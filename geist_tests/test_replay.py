@@ -1,6 +1,7 @@
 from __future__ import division, absolute_import, print_function
 import os
 import unittest
+import mock
 from geist import Location, GUI
 from geist.backends.fake import GeistFakeBackend
 from geist.backends.replay import (
@@ -76,10 +77,18 @@ class TestReplay(unittest.TestCase):
     def _decorated_method(self, gui):
         gui.key_presses('abcd')
 
-    @unittest.skip("Need to mock get_platform_backend")
+    def _get_fake_backend(self):
+        return GeistFakeBackend()
+
     def test_decorator(self):
-        with EnvironmentContext(GEIST_REPLAY_MODE=_RECORD_MODE_ENV_VAR_VALUE):
-            self._decorated_method()
+        with mock.patch(
+            'geist.backends.replay.get_platform_backend',
+            self._get_fake_backend
+        ):
+            with EnvironmentContext(
+                GEIST_REPLAY_MODE=_RECORD_MODE_ENV_VAR_VALUE
+            ):
+                self._decorated_method()
         with EnvironmentContext(GEIST_REPLAY_MODE="playback"):
             self._decorated_method()
 
