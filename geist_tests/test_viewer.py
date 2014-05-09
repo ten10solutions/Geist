@@ -29,19 +29,20 @@ class TestViewer(unittest.TestCase):
 
 
     def test_save(self):
-        self.V._save('test_file', Location(0,0, w=1, h=1).image)
+        self.V._save('test_file', np.array([0]))
         self.assertIn('test_file', self.repo.entries)
 
 
     def test_save_overwrite(self):
-        self.V._save('test_file', Location(0,0, w=1, h=1).image)
+        self.V._save('test_file', np.array([0]))
         with self.assertRaises(KeyError):
-            self.V._save('test_file', Location(0,0, w=1, h=1).image)
+            self.V._save('test_file', np.array([1]))
 
 
     def test_save_force(self):
-        self.V._save('test_file', Location(0,0, w=1, h=1).image, force=True)
-        self.assertIn('test_file', self.repo.entries)
+        self.V._save('test_file', np.array([0]))
+        self.V._save('test_file', np.array([1]), force=True)
+        self.assertEqual(self.repo['test_file'].image, np.array([1]))
 
 
     def tearDown(self):
