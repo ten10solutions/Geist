@@ -10,7 +10,7 @@ class Viewer(object):
         self._repo = repo
 
     def save(self, name, force=False):
-        self._save(name, self.visible, force=force)
+        self._save(name, self.visible(), force=force)
 
     def _save(self, name, image_to_save, force=False):
         if name in self._repo.entries and force==False:
