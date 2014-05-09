@@ -1,5 +1,6 @@
 from __future__ import division, absolute_import, print_function
 import os
+import sys
 import json
 import base64
 import StringIO
@@ -12,6 +13,7 @@ import numpy
 import logging
 
 logger = logging.getLogger(__name__)
+
 
 """These backends provide support for writing tests of code using Geist.
 
@@ -40,14 +42,34 @@ _MODE_ENV_VAR_NAME = 'GEIST_REPLAY_MODE'
 _RECORD_MODE_ENV_VAR_VALUE = 'record'
 
 
+def is_in_record_mode():
+    return os.environ.get(_MODE_ENV_VAR_NAME, '') == _RECORD_MODE_ENV_VAR_VALUE
+
+
 @wrapt.decorator
 def geist_replay(wrapped, instance, args, kwargs):
     """Wraps a test of other function and injects a Geist GUI which will
     enable replay (set environment variable GEIST_REPLAY_MODE to 'record' to
     active record mode."""
-    name = wrapped.__name__
-    filename = '%s.log' % (name,)
-    if os.environ.get(_MODE_ENV_VAR_NAME, '') == _RECORD_MODE_ENV_VAR_VALUE:
+    path_parts = []
+    file_parts = []
+
+    if hasattr(wrapped, '__module__'):
+        module = wrapped.__module__
+        module_file = sys.modules[module].__file__
+        root, _file = os.path.split(module_file)
+        path_parts.append(root)
+        _file, _ = os.path.splitext(_file)
+        file_parts.append(_file)
+    if hasattr(wrapped, '__objclass__'):
+        file_parts.append(wrapped.__objclass__.__name__)
+    elif hasattr(wrapped, '__self__'):
+        file_parts.append(wrapped.__self__.__class__.__name__)
+    file_parts.append(wrapped.__name__ + '.log')
+    path_parts.append('_'.join(file_parts))
+    filename = os.path.join(*path_parts)
+
+    if is_in_record_mode():
         platform_backend = get_platform_backend()
         backend = RecordingBackend(
             source_backend=platform_backend,
@@ -72,10 +94,13 @@ class _ActionsTransaction(object):
         self._actions_builder.execute()
         return False
 
+_FORMAT_VERSION = [0,1]
 
 class PlaybackBackend(object):
     def __init__(self, recording_filename='backend_recording.log'):
         self._record_file = open(recording_filename, 'rb')
+        version = json.loads(next(self._record_file))
+        assert version['version'] == _FORMAT_VERSION
 
     def capture_locations(self):
         logger.debug('replay func: "capture_locations" called')
@@ -149,6 +174,9 @@ class RecordingBackend(object):
             raise ValueError('source_backend is required for %r' % (self))
         self._source_backend = source_backend
         self._record_file = open(recording_filename, 'wb')
+        json.dump({'version': _FORMAT_VERSION}, self._record_file)
+        self._record_file.write('\n')
+        self._record_file.flush()
 
     def _write_action(self, funcname, *args, **kwargs):
         json.dump(
