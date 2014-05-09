@@ -10,10 +10,13 @@ class Viewer(object):
         self._repo = repo
 
     def save(self, name, force=False):
+        self._save(name, self.visible(), force=force)
+
+    def _save(self, name, image_to_save, force=False):
         if name in self._repo.entries and force==False:
             raise KeyError(
                 name + ' already exists, to overwrite, pass force=True')
-        self._repo[name] = self.visible()
+        self._repo[name] = image_to_save
 
     def visible(self):
         a = gcf().get_axes()[0]
@@ -47,7 +50,7 @@ class Viewer(object):
                 image[l.y:l.y + l.h, l.x:l.x + l.w, :] *= 0.75
                 image[l.y:l.y + l.h, l.x:l.x + l.w, c] = 255
             imshow(image, interpolation='none')
-    
+
     def _get_colour(self, numpy_array):
         hue, sat, val = rgb_to_hsv(numpy_array)
         hmin = hue.min()
@@ -60,7 +63,7 @@ class Viewer(object):
             (h >= hmin) & (h <= hmax)) &
             ((s >= smin) & (s <= smax)) &
             ((v >= vmin) & (v <= vmax)))
- 
+
 
     def get_colour(self):
         return self._get_colour(self.visible())
