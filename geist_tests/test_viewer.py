@@ -27,20 +27,26 @@ class TestViewer(unittest.TestCase):
         expected = [Location(0,0, w=2, h=1, parent=self.screen)]
         self.assertListEqual(result, expected)
 
+
     def test_save(self):
         self.V._save('test_file', Location(0,0, w=1, h=1).image)
         self.assertIn('test_file', self.repo.entries)
 
+
     def test_save_overwrite(self):
         self.V._save('test_file', Location(0,0, w=1, h=1).image)
-        self.assertRaises(KeyError, self.V._save('test_file', Location(0,0, w=1, h=1).image))
+        with self.assertRaises(KeyError):
+            self.V._save('test_file', Location(0,0, w=1, h=1).image)
+
 
     def test_save_force(self):
         self.V._save('test_file', Location(0,0, w=1, h=1).image, force=True)
         self.assertIn('test_file', self.repo.entries)
 
+
     def tearDown(self):
-        del self.repo['test_file']
+        if 'test_file' in self.repo.entries:
+            del self.repo['test_file']
 
 
 viewer_suite = unittest.TestLoader().loadTestsFromTestCase(TestViewer)
