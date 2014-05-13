@@ -6,6 +6,7 @@ from hamcrest import (
     has_length, greater_than_or_equal_to, less_than_or_equal_to)
 from hamcrest.core.string_description import tostring as describe_to_string
 import numpy
+import math
 from .keyboard import KeyDown, KeyUp, KeyDownUp, keyboard_layout_factory
 
 
@@ -284,6 +285,8 @@ class GUI(object):
     def drag(self, from_finder, to_finder):
         _from = self.wait_find_one(from_finder).main_point
         to = self.wait_find_one(to_finder).main_point
+        _from = (int(_from[0]), int(_from[1]))
+        to = (int(to[0]), int(to[1]))
         with self._backend.actions_transaction() as actions:
             actions.add_move(_from)
             actions.add_wait(self.config_mouse_move_wait)
@@ -293,6 +296,54 @@ class GUI(object):
             actions.add_wait(self.config_mouse_move_wait)
             actions.add_button_up(1)
             actions.add_wait(self.config_mouse_button_wait)
+            
+            
+    def drag_incremental(self, from_finder, to_finder, increment=50):
+        _from = self.wait_find_one(from_finder).main_point
+        to = self.wait_find_one(to_finder).main_point
+        _from = (int(_from[0]), int(_from[1]))
+        to = (int(to[0]), int(to[1]))
+        x_distance = to[0] - _from[0] 
+        y_distance = to[1] - _from[1] 
+        distance = math.sqrt(x_distance**2+y_distance**2)
+        #print x_distance, y_distance
+        if x_distance >= 0:
+              x_mult = 1
+        else:
+              x_mult  = -1
+        if y_distance >= 0:
+              y_mult = 1
+        else:
+              y_mult = -1
+        # use exponents so one sum can do all 4 cases
+        total_distance_per_move = math.sqrt(2*increment**2)
+        number_moves = int(distance/total_distance_per_move)
+        if x_distance != 0 and y_distance !=0:
+            # if x_dist = y_dist, get 1- should be 0.5- just multiply?
+            x_y_ratio = 0.5*(x_distance/y_distance)
+        elif x_distance == 0:
+            x_y_ratio = 0
+        elif y_distance == 0:
+            x_y_ratio = 1
+        x_step = int(x_y_ratio*total_distance_per_move)
+        y_step = int((1-x_y_ratio)*total_distance_per_move)
+        #print x_y_ratio, x_step, y_step, number_moves
+        with self._backend.actions_transaction() as actions:
+                actions.add_move(_from)
+                actions.add_wait(self.config_mouse_move_wait)
+                actions.add_button_down(1)
+                for i in range(1, int(number_moves+1)):
+                    next_point = (_from[0] + ((i*x_step)*x_mult), _from[1] + ((i*y_step)*y_mult))
+                    if next_point[0] < 0 or next_point[1] < 0:
+                        raise ValueError('Tried to move to point (%d, %d)' % point)
+                    actions.add_move(next_point)
+                    actions.add_wait(self.config_mouse_button_wait)
+                    #print next_point, ((i*x_step)*x_mult), ((i*y_step)*y_mult), x_step, i*x_step
+                actions.add_move(to)
+                actions.add_wait(self.config_mouse_move_wait)
+                actions.add_button_up(1)
+                actions.add_wait(self.config_mouse_button_wait)
+                
 
     def drag_relative(self, from_finder, offset):
         from_x, from_y = self.wait_find_one(from_finder)
