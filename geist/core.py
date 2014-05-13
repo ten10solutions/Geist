@@ -326,6 +326,8 @@ class GUI(object):
                 actions.add_button_down(1)
                 for i in range(1, int(number_moves+1)):
                     next_point = (_from[0] + ((i*x_step)*x_mult), _from[1] + ((i*y_step)*y_mult))
+                    if next_point[0] < 0 or next_point[1] < 0:
+                        raise ValueError('Tried to move to point (%d, %d)' % point)
                     actions.add_move(next_point)
                     actions.add_wait(self.config_mouse_button_wait)
                     #print next_point, ((i*x_step)*x_mult), ((i*y_step)*y_mult), x_step, i*x_step

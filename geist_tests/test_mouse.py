@@ -2,86 +2,69 @@ from __future__ import division, absolute_import, print_function
 import os
 import unittest
 from geist import Location, GUI, LocationList
-from geist.backends.windows import _Mouse, _ActionsTransaction
-import concurrent.futures
 import time
 import numpy as np
+from geist.backends.fake import GeistFakeBackend
 
-from ctypes  import windll, pointer, c_long, c_ulong, Structure
+class FakeBackendActionBuilder(object):
+    def __init__(self, backend):
+        self._backend = backend
+        self._actions = []
+        
+    def add_move(self, point):
+        self._actions.append(lambda: self._backend.move(point))
+      
+    def add_wait(self, seconds):
+        self._actions.append(lambda: time.sleep(seconds))
+        
+    def add_button_down(self, *args):
+        self._actions.append(lambda: self._backend.button_down())
+      
+    def add_button_up(self, *args):
+        self._actions.append(lambda: self._backend.button_up())
+        
+    def execute(self):   
+        for action in self._actions:
+           action()
+        
+    
+class FakeActionsTransaction(object):    
+    def __init__(self, backend):
+        self._actions_builder = FakeBackendActionBuilder(backend)
 
-        
-        
-class _point_t(Structure):
-    _fields_ = [
-                ('x',  c_long),
-                ('y',  c_long),
-               ]
-  
-def get_cursor_position():
-    point = _point_t()
-    result = windll.user32.GetCursorPos(pointer(point))
-    if result:  return (point.x, point.y)
-    else:       return None
+    def __enter__(self):
+        return self._actions_builder
 
+    def __exit__(self, *args):
+        self._actions_builder.execute()
+        return False
         
-def get_mouse_positions():
-    start = time.time()
-    positions = []
-    while drag_mouse.result == None and time.time() < start + 10:
-        positions.append(get_cursor_position())
-        
-       
 
-class GeistMouseBackend(object):
-    def __init__(self, **kwargs):
-        self._mouse = _Mouse()
-        self.list = []
-        image = kwargs.get('image')
-        w = kwargs.get('w', 1000)
-        h = kwargs.get('h', 1000)
-        
-        if image is None:
-            self.image = np.zeros((h, w, 3), dtype=np.ubyte)
-            self.locations = LocationList(
-                [Location(0, 0, w=w, h=h, image=self.image)]
-            )
-        else:
-            if isinstance(image, basestring):
-                image = np.load(image)
-            self.image = image
-            h, w, _ = image.shape
-            self.locations = LocationList(
-                [Location(0, 0, w=w, h=h, image=self.image)]
-            )
-            
+class GeistMouseBackend(GeistFakeBackend):
+    def __init__(self):
+        super(GeistMouseBackend, self).__init__(h=1000, w=1000)
+        self.list_of_points = []
+        self.button_down_pressed = False
+        self.button_up_pressed = False
             
     def move(self, point):
-        self._mouse.move(point)
-        self.list.append(get_cursor_position())
+        print(point)
+        self.list_of_points.append(point)
+        print(self.list_of_points)
         
-    def create_process(self, command):
-        raise AssertionError
-
     def actions_transaction(self):
-        return _ActionsTransaction(self)
+        return FakeActionsTransaction(self)
 
-    def capture_locations(self):
-        for loc in self.locations:
-            yield loc
+    def button_down(self):
+        self.button_down_pressed = True
 
-    def key_down(self, name):
-        raise AssertionError
-
-    def key_up(self, name):
-        raise AssertionError
-
-    def button_down(self, button_num):
-        self._mouse.button_down(button_num)
-
-    def button_up(self, button_num):
-        self._mouse.button_up(button_num)
-    def close(self):
-        raise AssertionError
+    def button_up(self):
+        if self.button_down_pressed == False:
+            # can't imagine why we'd ever want to have the button come up before its gone down
+            raise AssertionError
+        else:
+            self.button_up_pressed = True
+        
 
     
 class TestMouseDrag(unittest.TestCase):
@@ -89,25 +72,32 @@ class TestMouseDrag(unittest.TestCase):
     # need to define functions to run concurrently
     def test_mouse_drag_y_dir(self):
         backend = GeistMouseBackend()
-        #print(type(backend))
-        gui = GUI(backend)
-        #print(type(gui))
+        gui = GUI(backend)                                                                                 
         gui.drag_incremental(Location(200,200), Location(201,900))
         # this overshoots on y then goes back, not ideal!!
         positions = [(200,200), (200, 270), (200, 340),(200, 410),(200, 480),
-                            (200, 550),(200, 620),(200, 690),(200, 760),(200, 830), (201,900)]
-        print(backend.list)                    
-        self.assertEquals(sorted(positions), sorted(backend.list))
+                            (200, 550),(200, 620),(200, 690),(200, 760),(200, 830), (201,900)]                
+        self.assertEquals(sorted(positions), sorted(backend.list_of_points))
+        self.assertTrue(backend.button_down_pressed)
+        self.assertTrue(backend.button_up_pressed)
         
     def test_mouse_drag_equal_dirs(self):
         backend = GeistMouseBackend()
-        #print(type(backend))
         gui = GUI(backend)
-        #print(type(gui))
         gui.drag_incremental(Location(200,200), Location(400, 400))
-        positions = [(200,200),(235, 235), (270, 270), (305, 305), (340, 340), (400,400)]
-        print(backend.list)         
-        self.assertEquals(sorted(positions), sorted(backend.list))
+        positions = [(200,200),(235, 235), (270, 270), (305, 305), (340, 340), (400,400)]        
+        self.assertEquals(sorted(positions), sorted(backend.list_of_points))
+        self.assertTrue(backend.button_down_pressed)
+        self.assertTrue(backend.button_up_pressed)
+        
+    def test_mouse_drag_x_dir(self):
+        backend = GeistMouseBackend()
+        gui = GUI(backend)
+        gui.drag_incremental(Location(200,200), Location(0, 200))
+        positions = [(200,200),(130, 200), (60, 200), (0, 200)]        
+        self.assertEquals(sorted(positions), sorted(backend.list_of_points))
+        self.assertTrue(backend.button_down_pressed)
+        self.assertTrue(backend.button_up_pressed)
         
         
 replay_suite = unittest.TestLoader().loadTestsFromTestCase(TestMouseDrag)
