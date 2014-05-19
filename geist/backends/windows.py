@@ -184,7 +184,8 @@ class _KeyBoard(object):
         'minus': '-',
         'colon': ':',
         'backslash': '\\',
-        'underscore': '_'
+        'underscore': '_',
+        'exclam': '!'
 
     }
 
