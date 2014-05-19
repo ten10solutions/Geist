@@ -203,13 +203,18 @@ class _KeyBoard(object):
         else:
             return _USER32.VkKeyScanW(WCHAR(name)) & 0xFF
 
+    def _map_virtual_key(self, key):
+        return _USER32.MapVirtualKeyA(key & 0xff, 0)
+
     def key_down(self, name):
         vkey = self._convert_keyname_to_virtual_key(name)
-        _USER32.keybd_event(vkey, 0, _KeyBoard.KEYEVENTF_KEYDOWN, None)
+        scan = self._map_virtual_key(vkey)
+        _USER32.keybd_event(vkey, scan, _KeyBoard.KEYEVENTF_KEYDOWN, None)
 
     def key_up(self, name):
         vkey = self._convert_keyname_to_virtual_key(name)
-        _USER32.keybd_event(vkey, 0, _KeyBoard.KEYEVENTF_KEYUP, None)
+        scan = self._map_virtual_key(vkey)
+        _USER32.keybd_event(vkey, scan | 0x80, _KeyBoard.KEYEVENTF_KEYUP, None)
 
 
 class _Mouse(object):
