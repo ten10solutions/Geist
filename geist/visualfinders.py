@@ -1,6 +1,6 @@
 from __future__ import division, absolute_import, print_function
 
-from .core import Location
+from .finders import Location
 from .vision import best_convolution, grey_scale, find_edges
 from .colour import rgb_to_hsv
 from .ocr import Classifier

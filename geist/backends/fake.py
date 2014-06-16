@@ -1,5 +1,5 @@
 import numpy as np
-from ..core import Location, LocationList
+from ..finders import Location, LocationList
 
 
 class GeistFakeBackend(object):

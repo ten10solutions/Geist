@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 from numpy.testing import assert_array_equal
 
-from geist.core import Location
+from geist.finders import Location
 
 
 class TestLocation(unittest.TestCase):

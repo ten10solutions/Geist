@@ -1,7 +1,6 @@
 from __future__ import division, absolute_import, print_function
 from itertools import groupby
-from .core import Location
-from .finders import BaseFinder
+from .finders import Location, BaseFinder
 
 
 class FinderInFinder(BaseFinder):

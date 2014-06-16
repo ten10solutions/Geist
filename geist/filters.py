@@ -1,5 +1,5 @@
 from itertools import islice
-from .finder import BaseFinder
+from .finders import BaseFinder
 
 
 class LocationFinderFilter(BaseFinder):
