@@ -1,4 +1,4 @@
-from __future__ import division
+from __future__ import print_function, division
 from numpy.fft import irfft2, rfft2
 import numpy
 import itertools
@@ -526,5 +526,5 @@ def correlation_coefficient_normed(template, image):
                 (template_distance ** 2).sum() *
                 (image_distance_of_template_area ** 2).sum()
             )
-        print y
+        print(y)
     return corr_num / corr_denum
