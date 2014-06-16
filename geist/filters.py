@@ -1,7 +1,8 @@
 from itertools import islice
+from .finder import BaseFinder
 
 
-class LocationFinderFilter(object):
+class LocationFinderFilter(BaseFinder):
     def __init__(self, filter_func, finder):
         self.filter_func = filter_func
         self.finder = finder
@@ -18,7 +19,7 @@ class LocationFinderFilter(object):
         )
 
 
-class SortingFinder(object):
+class SortingFinder(BaseFinder):
     """
     Sort found locations with the given key
     """
@@ -39,7 +40,7 @@ class SortingFinder(object):
         return '<SortFinder %r with %r>' % (self.finder, self.key)
 
 
-class SliceFinderFilter(object):
+class SliceFinderFilter(BaseFinder):
     """
     Slice the returned results
     """

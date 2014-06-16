@@ -10,11 +10,12 @@ from scipy.ndimage.measurements import (
     find_objects,
 )
 import logging
+from .finders import BaseFinder
 
 logger = logging.getLogger(__name__)
 
 
-class TextFinderFilter(object):
+class TextFinderFilter(BaseFinder):
     def __init__(self, classifier, finder, text):
         self.classifier = classifier
         self.text = text
@@ -36,7 +37,7 @@ def text_finder_filter_from_path(path):
     return lambda finder, text: TextFinderFilter(classifier, finder, text)
 
 
-class ApproxTemplateFinder(object):
+class ApproxTemplateFinder(BaseFinder):
     def __init__(self, template):
         self.template = template
 
@@ -56,7 +57,7 @@ class ApproxTemplateFinder(object):
         return "match %r approximately" % (self.template, )
 
 
-class ExactTemplateFinder(object):
+class ExactTemplateFinder(BaseFinder):
     def __init__(self, template):
         self.template = template
         self.approx_template_finder = ApproxTemplateFinder(self.template)
@@ -77,7 +78,7 @@ class ExactTemplateFinder(object):
         return "match %r exactly" % (self.template, )
 
 
-class ThresholdTemplateFinder(object):
+class ThresholdTemplateFinder(BaseFinder):
     def __init__(self, template, threshold):
         self.template = template
         self.threshold = threshold
@@ -100,7 +101,7 @@ class ThresholdTemplateFinder(object):
         return "match %r using threshold %r" % (self.template, self.threshold)
 
 
-class MultipleFinderFinder(object):
+class MultipleFinderFinder(BaseFinder):
     def __init__(self, *finders):
         self.finders = finders
 
@@ -110,7 +111,7 @@ class MultipleFinderFinder(object):
                 yield location
 
 
-class BinaryRegionFinder(object):
+class BinaryRegionFinder(BaseFinder):
     def __init__(self, binary_image_function):
         self.binary_image_function = binary_image_function
 
@@ -127,7 +128,7 @@ class BinaryRegionFinder(object):
             )
 
 
-class ColourRegionFinder(object):
+class ColourRegionFinder(BaseFinder):
     def __init__(self, colour_filter):
         self.binary_finder = BinaryRegionFinder(
             lambda image: colour_filter(*rgb_to_hsv(image))
@@ -137,7 +138,7 @@ class ColourRegionFinder(object):
         return self.binary_finder.find(in_location)
 
 
-class GreyscaleRegionFinder(object):
+class GreyscaleRegionFinder(BaseFinder):
     def __init__(self, grey_scale_filter):
         self.binary_finder = BinaryRegionFinder(
             lambda image: grey_scale_filter(grey_scale(image))
