@@ -1,4 +1,6 @@
 import numpy as np
+from six import string_types
+
 from ..finders import Location, LocationList
 
 
@@ -14,7 +16,7 @@ class GeistFakeBackend(object):
                 [Location(0, 0, w=w, h=h, image=self.image)]
             )
         else:
-            if isinstance(image, basestring):
+            if isinstance(image, string_types):
                 image = np.load(image)
             self.image = image
             h, w, _ = image.shape

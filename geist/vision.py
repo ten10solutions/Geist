@@ -2,6 +2,7 @@ from __future__ import print_function, division
 from numpy.fft import irfft2, rfft2
 import numpy
 import itertools
+from six import iteritems
 import operator
 
 
@@ -84,10 +85,10 @@ def best_convolution(bin_template, bin_image,
     max_hor_cells = iw // th
 
     # Try to work out how many times we can stack the image
-    usable_factors = {n: factors for n, factors in overlap_table.iteritems()
+    usable_factors = {n: factors for n, factors in iteritems(overlap_table)
                       if ((template_sum + 1) ** (n)) < ACCURACY_LIMIT}
     overlap_options = [(factor, n // factor)
-                       for n, factors in usable_factors.iteritems()
+                       for n, factors in iteritems(usable_factors)
                        for factor in factors
                        if (factor <= max_vert_cells and
                            n // factor <= max_hor_cells)]

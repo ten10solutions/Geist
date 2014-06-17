@@ -19,6 +19,7 @@ setup(
         'pillow',
         'wrapt',
         'mock',
+        'six',
     ],
     description='Visual Automation Library',
     classifiers=[

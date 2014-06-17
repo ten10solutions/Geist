@@ -3,7 +3,7 @@ import os
 import sys
 import json
 import base64
-import StringIO
+from six import StringIO
 import wrapt
 from PIL import Image
 from . import get_platform_backend
