@@ -66,7 +66,7 @@ class ExactTemplateFinder(object):
         ih, iw = image.shape[:2]
         th, tw = self.template.image.shape[:2]
         for location in self.approx_template_finder.find(in_location):
-            x, y = location.x, location.y
+            x, y = location.rel_x, location.rel_y
             if (x >= 0 and y >= 0 and x + tw <= iw and y + th <= ih):
                 if numpy.all(
                     numpy.equal(image[y:y + th, x:x + tw], self.template.image)
