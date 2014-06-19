@@ -51,11 +51,12 @@ class GeistXBase(object):
     def display(self):
         return self._display
 
-    def create_process(self, command, shell=True, stdout=None, stderr=None):
+    def create_process(self, command, shell=True, stdout=None, stderr=None,
+                       env=None):
         """
         Execute a process using subprocess.Popen, setting the backend's DISPLAY
         """
-        env = kwargs.pop('env', dict(os.environ))
+        env = env if env is not None else dict(os.environ)
         env['DISPLAY'] = self.display
         return subprocess.Popen(command, shell=shell,
                                 stdout=stdout, stderr=stderr,
