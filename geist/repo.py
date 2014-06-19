@@ -3,6 +3,7 @@ import numpy
 import os
 import os.path
 import glob
+from .finders import BaseFinder
 
 
 class Template(object):
@@ -61,7 +62,7 @@ class DirectoryRepo(object):
         return "directory repo %r" % (self.__directory, )
 
 
-class TemplateBasedFinder(object):
+class TemplateBasedFinder(BaseFinder):
     def __init__(self, repo, name, finder_constructor):
         self._name = name
         self._repo = repo

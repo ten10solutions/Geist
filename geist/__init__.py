@@ -31,9 +31,12 @@ from .repo import (
 )
 
 from .core import (
-    Location,
     NotFoundError,
     GUI,
+)
+
+from .finders import (
+    Location,
     LocationList,
 )
 

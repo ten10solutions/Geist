@@ -7,7 +7,8 @@ import StringIO
 import wrapt
 from PIL import Image
 from . import get_platform_backend
-from ..core import GUI, Location, LocationList
+from ..core import GUI
+from ..finders import Location, LocationList
 from ._common import BackendActionBuilder
 import numpy
 import logging
