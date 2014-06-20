@@ -22,7 +22,7 @@ from ctypes.wintypes import (
     LONG,
     WORD
 )
-from geist.core import Location, LocationList
+from geist.finders import Location, LocationList
 from ._common import BackendActionBuilder
 from . import logger
 
