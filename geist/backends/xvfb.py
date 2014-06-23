@@ -8,7 +8,7 @@ import shutil
 import struct
 from . import logger
 from ._x11_common import GeistXBase
-from ..core import Location, LocationList
+from ..finders import Location, LocationList
 
 
 XVFB_PATH = '/var/tmp/Xvfb_display%d'
