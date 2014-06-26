@@ -261,7 +261,8 @@ class GUI(object):
         if merged_opts.wait_for_image_change_pre_action:
             self._wait_for_image_change(location, merged_opts)
         with self._backend.actions_transaction() as actions:
-            self._button_click(actions, 1, merged_opts)
+            for i in range(times):
+                self._button_click(actions, button, merged_opts)
         if merged_opts.wait_for_image_change_post_action:
             self._wait_for_image_change(location, merged_opts)
         return location
