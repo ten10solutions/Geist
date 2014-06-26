@@ -215,8 +215,8 @@ class GUI(object):
         with self._backend.actions_transaction() as actions:
             self._move(actions, from_point, merged_opts)
             actions.add_button_down(1)
-            if merged_opts.mouse_btton_down_wait != 0:
-                actions.add_wait(self.mouse_btton_down_wait)
+            if merged_opts.mouse_button_down_wait != 0:
+                actions.add_wait(merged_opts.mouse_button_down_wait)
             if not merged_opts.mouse_warp_dragging:
                 self._incremental_move(
                     actions,
@@ -229,8 +229,8 @@ class GUI(object):
             if merged_opts.mouse_move_wait != 0:
                 actions.add_wait(merged_opts.mouse_move_wait)
             actions.add_button_up(1)
-            if merged_opts.mouse_btton_up_wait != 0:
-                actions.add_wait(self.mouse_up_down_wait)
+            if merged_opts.mouse_button_up_wait != 0:
+                actions.add_wait(merged_opts.mouse_button_up_wait)
         return from_location, to_location
 
     def drag_relative(self, from_finder, offset, **options):
