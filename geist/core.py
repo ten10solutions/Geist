@@ -166,7 +166,7 @@ class GUI(object):
         inc_x = x_distance / num_increments
         inc_y = y_distance / num_increments
         for i in range(start_increment, num_increments):
-            actions.add_move((from_x + (inc_x*i), from_y + (inc_y*i)))
+            actions.add_move((int(from_x + (inc_x*i)), int(from_y + (inc_y*i))))
             if merged_opts.mouse_move_wait != 0:
                 actions.add_wait(merged_opts.mouse_move_wait)
         actions.add_move(to_point)
