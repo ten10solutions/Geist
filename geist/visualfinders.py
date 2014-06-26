@@ -9,6 +9,7 @@ from scipy.ndimage.measurements import (
     label,
     find_objects,
 )
+from scipy.ndimage.morphology import binary_propagation
 import logging
 from .finders import BaseFinder
 
@@ -146,3 +147,26 @@ class GreyscaleRegionFinder(BaseFinder):
 
     def find(self, in_location):
         return self.binary_finder.find(in_location)
+
+
+class ContainerFinder(BaseFinder):
+    def __init__(self, finder, binary_image_function):
+        self._binary_image_function = binary_image_function
+        self._finder = finder
+
+    def find(self, in_location):
+        image = in_location.image
+        processed_image = self._binary_image_function(image)
+        mask = processed_image == False
+        propagation_input = numpy.zeros_like(processed_image)
+        for loc in self._finder.find(in_location):
+            propagation_input[loc.y:loc.y+loc.h, loc.x:loc.x+loc.w] = True
+        propagation = binary_propagation(propagation_input, mask=mask)
+        for y_slice, x_slice in find_objects(*label(propagation)):
+            yield Location(
+                x_slice.start,
+                y_slice.start,
+                x_slice.stop - x_slice.start,
+                y_slice.stop - y_slice.start,
+                parent=in_location
+            )

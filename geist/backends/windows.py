@@ -161,6 +161,9 @@ class GeistWindowsBackend(object):
     def move(self, point):
         self._mouse.move(point)
 
+    def cursor_position(self):
+        return self._mouse.cursor_position()
+
     def close(self):
         pass
 
@@ -196,6 +199,14 @@ class _KeyBoard(object):
             return _KeyBoard.VK_MENU
         elif name == 'control':
             return _KeyBoard.VK_CONTROL
+        elif name == 'down':
+            return _KeyBoard.VK_DOWN_ARROW
+        elif name == 'up':
+            return _KeyBoard.VK_UP_ARROW
+        elif name == 'lshift':
+            return _KeyBoard.VK_LSHIFT
+        elif name == 'rshift':
+            return _KeyBoard.VK_RSHIFT
         elif name in _KeyBoard.CHAR_TO_NAME_MAP:
             return _USER32.VkKeyScanW(
                 WCHAR(_KeyBoard.CHAR_TO_NAME_MAP[name])
@@ -245,9 +256,12 @@ class _Mouse(object):
         return (int(x * (norm / w)), int(y * (norm/h)))
 
     def move(self, point):
-        self._current_point = point
-        x, y = self._normalize_coords(point)
         _USER32.SetCursorPos(*point)
+
+    def cursor_position(self):
+        point = POINT()
+        _USER32.GetCursorPos(byref(point))
+        return point.x, point.y
 
     def scroll(lines):
         _USER32.mouse_event(

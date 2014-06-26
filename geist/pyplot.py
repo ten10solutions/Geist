@@ -1,6 +1,7 @@
 from itertools import cycle
 from matplotlib.pyplot import cm, figure, gcf, imshow
 from geist.colour import rgb_to_hsv, hsv
+from geist.finders import Location
 import numpy
 
 
@@ -27,6 +28,14 @@ class Viewer(object):
         y1 = int(y1 + 0.5)
         y2 = int(numpy.ceil(y2 + 0.5))
         return numpy.array(a.get_images()[-1].get_array()[y1:y2, x1:x2])
+
+    def location(self):
+        a = gcf().get_axes()[0]
+        x1 = int(x1 + 0.5)
+        x2 = int(numpy.ceil(x2 + 0.5))
+        y1 = int(y1 + 0.5)
+        y2 = int(numpy.ceil(y2 + 0.5))
+        return Location(x1, y1, x2 - x1, y2 - y1, image=numpy.array(a.get_images()[-1].get_array()))
 
     def show_capture(self):
         for location in self._gui.capture_locations():
@@ -59,6 +68,7 @@ class Viewer(object):
         smax = sat.max()
         vmin = val.min()
         vmax = val.max()
+        print hmin, hmax, smin, smax, vmin, vmax
         return hsv(lambda h, s, v: (
             (h >= hmin) & (h <= hmax)) &
             ((s >= smin) & (s <= smax)) &

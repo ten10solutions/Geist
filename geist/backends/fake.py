@@ -47,5 +47,8 @@ class GeistFakeBackend(object):
     def move(self, point):
         pass
 
+    def cursor_position(self):
+        return 0, 0
+
     def close(self):
         pass
