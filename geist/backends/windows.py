@@ -174,12 +174,25 @@ class GeistWindowsBackend(object):
 class _KeyBoard(object):
     KEYEVENTF_KEYUP = 0x0002
     KEYEVENTF_KEYDOWN = 0x0000
-    VK_SHIFT = 0x10
-    VK_CONTROL = 0x11
-    VK_MENU = 0x12
-    VK_RETURN = 0x0D
 
-    CHAR_TO_NAME_MAP = {
+    NAME_TO_VK_MAP = {
+        'page down': 0x22,
+        'page up': 0x21,
+        'end': 0x23,
+        'home': 0x24,
+        'shift': 0x10,
+        'menu': 0x12,
+        'control': 0x11,
+        'down': 0x28,
+        'up': 0x26,
+        'left': 0x25,
+        'right': 0x27,
+        'lshift': 0xA0,
+        'rshift': 0xA1,
+        'escape': 0x1B,
+    }
+
+    NAME_TO_CHAR_MAP = {
         'return': '\r',
         'space': ' ',
         'tab': '\t',
@@ -188,31 +201,18 @@ class _KeyBoard(object):
         'colon': ':',
         'backslash': '\\',
         'underscore': '_',
-        'exclam': '!'
-
+        'exclam': '!',
     }
 
     def _convert_keyname_to_virtual_key(self, name):
-        if name == 'shift':
-            return _KeyBoard.VK_SHIFT
-        elif name == 'menu':
-            return _KeyBoard.VK_MENU
-        elif name == 'control':
-            return _KeyBoard.VK_CONTROL
-        elif name == 'down':
-            return _KeyBoard.VK_DOWN_ARROW
-        elif name == 'up':
-            return _KeyBoard.VK_UP_ARROW
-        elif name == 'lshift':
-            return _KeyBoard.VK_LSHIFT
-        elif name == 'rshift':
-            return _KeyBoard.VK_RSHIFT
-        elif name in _KeyBoard.CHAR_TO_NAME_MAP:
-            return _USER32.VkKeyScanW(
-                WCHAR(_KeyBoard.CHAR_TO_NAME_MAP[name])
-            ) & 0xFF
+        if name in _KeyBoard.NAME_TO_VK_MAP:
+            return _KeyBoard.NAME_TO_VK_MAP[name]
+        elif name in _KeyBoard.NAME_TO_CHAR_MAP:
+            char = _KeyBoard.NAME_TO_CHAR_MAP[name]
         else:
-            return _USER32.VkKeyScanW(WCHAR(name)) & 0xFF
+            char = name
+        assert len(char) == 1, "can not convert %r" % (char,)
+        return _USER32.VkKeyScanW(WCHAR(char)) & 0xFF
 
     def _map_virtual_key(self, key):
         return _USER32.MapVirtualKeyA(key & 0xff, 0)
@@ -225,7 +225,7 @@ class _KeyBoard(object):
     def key_up(self, name):
         vkey = self._convert_keyname_to_virtual_key(name)
         scan = self._map_virtual_key(vkey)
-        _USER32.keybd_event(vkey, scan | 0x80, _KeyBoard.KEYEVENTF_KEYUP, None)
+        _USER32.keybd_event(vkey, scan, _KeyBoard.KEYEVENTF_KEYUP, None)
 
 
 class _Mouse(object):
