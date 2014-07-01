@@ -158,8 +158,8 @@ class GUI(object):
         if to_point == from_point:
             return
         (from_x, from_y), (to_x, to_y) = from_point, to_point
-        x_distance = from_x - to_x
-        y_distance = from_y - to_y
+        x_distance = to_x - from_x
+        y_distance = to_y - from_y
         distance_to_move = (x_distance ** 2 + y_distance ** 2) ** 0.5
         num_increments = int(distance_to_move //
                              merged_opts.mouse_move_increment)
