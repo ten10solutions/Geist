@@ -70,6 +70,7 @@ class KeyDownUp(object):
     def __str__(self):
         return self._keyname
 
+KeyPress = KeyDownUp
 
 SHIFT_DOWN = KeyDown('shift')
 SHIFT_UP = KeyUp('shift')
