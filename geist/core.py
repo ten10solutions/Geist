@@ -163,12 +163,13 @@ class GUI(object):
         distance_to_move = (x_distance ** 2 + y_distance ** 2) ** 0.5
         num_increments = int(distance_to_move //
                              merged_opts.mouse_move_increment)
-        inc_x = x_distance / num_increments
-        inc_y = y_distance / num_increments
-        for i in range(start_increment, num_increments):
-            actions.add_move((int(from_x + (inc_x*i)), int(from_y + (inc_y*i))))
-            if merged_opts.mouse_move_wait != 0:
-                actions.add_wait(merged_opts.mouse_move_wait)
+        if num_increments > 0:
+            inc_x = x_distance / num_increments
+            inc_y = y_distance / num_increments
+            for i in range(start_increment, num_increments):
+                actions.add_move((int(from_x + (inc_x*i)), int(from_y + (inc_y*i))))
+                if merged_opts.mouse_move_wait != 0:
+                    actions.add_wait(merged_opts.mouse_move_wait)
         actions.add_move(to_point)
         if merged_opts.mouse_move_wait != 0:
             actions.add_wait(merged_opts.mouse_move_wait)
