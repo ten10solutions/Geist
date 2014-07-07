@@ -95,7 +95,8 @@ class _ActionsTransaction(object):
         self._actions_builder.execute()
         return False
 
-_FORMAT_VERSION = [0,1]
+_FORMAT_VERSION = [0, 1]
+
 
 class PlaybackBackend(object):
     def __init__(self, recording_filename='backend_recording.log'):

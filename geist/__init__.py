@@ -49,5 +49,10 @@ from .filters import (
     top_most,
     bottom_most
 )
+from .keyboard import (
+    KeyUp,
+    KeyDown,
+    KeyPress
+)
 
 from .backends import get_platform_backend

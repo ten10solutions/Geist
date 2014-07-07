@@ -9,6 +9,7 @@ from scipy.ndimage.measurements import (
     label,
     find_objects,
 )
+from scipy.ndimage.morphology import binary_propagation, binary_erosion
 import logging
 from .finders import BaseFinder
 
@@ -35,6 +36,29 @@ def text_finder_filter_from_path(path):
     with open(path) as f:
         classifier.from_json(f.read())
     return lambda finder, text: TextFinderFilter(classifier, finder, text)
+
+
+class ThresholdTemplateFinder(BaseFinder):
+    def __init__(self, template, threshold=10):
+        self.template = template
+        self.threshold = threshold
+
+    def find(self, in_location):
+        h, w = self.template.image.shape[:2]
+        image = in_location.image
+        gimage = grey_scale(image)
+        gtemplate = grey_scale(self.template.image)
+        threshold_image = gimage > self.threshold
+        threshold_template = gtemplate > self.threshold
+        edge_image = find_edges(threshold_image)
+        edge_template = find_edges(threshold_template)
+        bin_image = edge_image > 0
+        bin_template = edge_template > 0
+        for x, y in best_convolution(bin_template, bin_image):
+            yield Location(x, y, w, h, parent=in_location)
+
+    def __repr__(self):
+        return "match %r using threshold %r" % (self.template, self.threshold)
 
 
 class ApproxTemplateFinder(BaseFinder):
@@ -76,29 +100,6 @@ class ExactTemplateFinder(BaseFinder):
 
     def __repr__(self):
         return "match %r exactly" % (self.template, )
-
-
-class ThresholdTemplateFinder(BaseFinder):
-    def __init__(self, template, threshold):
-        self.template = template
-        self.threshold = threshold
-
-    def find(self, in_location):
-        h, w = self.template.image.shape[:2]
-        image = in_location.image
-        gimage = grey_scale(image)
-        gtemplate = grey_scale(self.template.image)
-        threshold_image = gimage > self.threshold
-        threshold_template = gtemplate > self.threshold
-        edge_image = find_edges(threshold_image)
-        edge_template = find_edges(threshold_template)
-        bin_image = edge_image > 0
-        bin_template = edge_template > 0
-        for x, y in best_convolution(bin_template, bin_image):
-            yield Location(x + 1, y + 1, w, h, parent=in_location)
-
-    def __repr__(self):
-        return "match %r using threshold %r" % (self.template, self.threshold)
 
 
 class MultipleFinderFinder(BaseFinder):
@@ -146,3 +147,26 @@ class GreyscaleRegionFinder(BaseFinder):
 
     def find(self, in_location):
         return self.binary_finder.find(in_location)
+
+
+class ContainerFinder(BaseFinder):
+    def __init__(self, finder, binary_image_function):
+        self._binary_image_function = binary_image_function
+        self._finder = finder
+
+    def find(self, in_location):
+        image = in_location.image
+        processed_image = self._binary_image_function(image)
+        mask = processed_image == False
+        propagation_input = numpy.zeros_like(processed_image)
+        for loc in self._finder.find(in_location):
+            propagation_input[loc.y:loc.y+loc.h, loc.x:loc.x+loc.w] = True
+        propagation = binary_propagation(propagation_input, mask=mask)
+        for y_slice, x_slice in find_objects(*label(propagation)):
+            yield Location(
+                x_slice.start,
+                y_slice.start,
+                x_slice.stop - x_slice.start,
+                y_slice.stop - y_slice.start,
+                parent=in_location
+            )

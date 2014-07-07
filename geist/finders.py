@@ -1,4 +1,5 @@
-import numpy
+from __future__ import division
+import numpy as np
 
 
 class BaseFinder(object):
@@ -12,19 +13,25 @@ class BaseFinder(object):
 
 
 class Location(BaseFinder):
-    def __init__(self, rel_x, rel_y, w=0, h=0, main_point_offset=None,
+    def __init__(self, rel_x, rel_y, w=1, h=1, main_point_offset=None,
                  parent=None, image=None):
         """rel_x, rel_y, w, h are all cast to integers as its assumed we are
         dealing with whole pixels.
         """
+        rel_x, rel_y, w, h = int(rel_x), int(rel_y), int(w), int(h)
+
         if rel_x < 0:
             raise ValueError('rel_x must be >= 0')
         if rel_y < 0:
             raise ValueError('rel_y must be >= 0')
-        if parent is not None and w > parent.w:
-            raise ValueError('w must be <= parent.w or parent must be None')
-        if parent is not None and h > parent.h:
-            raise ValueError('h must be <= parent.h or parent must be None')
+        if w < 1:
+            raise ValueError('w must be >= 1')
+        if h < 1:
+            raise ValueError('h must be >= 1')
+        if parent is not None and rel_x + w > parent.w:
+            raise ValueError('rel_x + w must be <= parent.w or parent must be None')
+        if parent is not None and rel_y + h > parent.h:
+            raise ValueError('rel_y + h must be <= parent.h or parent must be None')
 
         self._rel_x, self._rel_y, self._w, self._h = (
             int(rel_x),
@@ -32,10 +39,11 @@ class Location(BaseFinder):
             int(w),
             int(h)
         )
+
         if main_point_offset is None:
             self._main_point_offset = (w // 2, h // 2)
         else:
-            self._main_point_offset = tuple(main_point_offset)
+            self._main_point_offset = tuple(int(i) for i in main_point_offset)
         self._parent = parent
         if image is not None:
             ih, iw = image.shape[:2]
@@ -60,7 +68,7 @@ class Location(BaseFinder):
         if self._image is not None:
             return self._image
         else:
-            return numpy.zeros((self.h, self.w, 3), dtype=numpy.uint8)
+            return np.zeros((self.h, self.w, 3), dtype=np.uint8)
 
     @property
     def rel_x(self):
@@ -141,6 +149,9 @@ class Location(BaseFinder):
             self._main_point_offset,
             self.parent,
         )
+
+    def equals_considering_only_image(self, other):
+        return np.all(np.equal(self.image, other.image))
 
     def __eq__(self, other):
         if self.parent != other.parent:
