@@ -25,6 +25,7 @@ class TestLocationFinderFilter(unittest.TestCase):
 
 class TestResponsiveFinders(unittest.TestCase):
     def setUp(self):
+        # typically images are rgb, and fake backend expects this
         self.location_image = np.array([[[1],[1]],[[1],[1]]], dtype=int)
         self.location = Location(0,0,2,2,image=self.location_image)
         
@@ -46,6 +47,7 @@ class TestResponsiveFinders(unittest.TestCase):
         location_found = list(finder.find(self.location))
         self.assertEquals(location_found, [])
         
+    # set it up with one image, then look using a location with a different image
     def test_nontrivial_StopChangingFinder(self):
         backend = GeistFakeBackend(image=np.array([[[0],[0]],[[0],[0]]]))
         gui = GUI(backend)
