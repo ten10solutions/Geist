@@ -68,36 +68,43 @@ class GeistMouseBackend(GeistFakeBackend):
 
 
 class TestMouseDrag(unittest.TestCase):
+    def setUp(self):
+        self.backend = GeistMouseBackend()
+        self.gui = GUI(self.backend)
+                
     # need ot be getting cursor position while the drag operation is happening
     # need to define functions to run concurrently
     def test_mouse_drag_y_dir(self):
-        backend = GeistMouseBackend()
-        gui = GUI(backend)
-        gui.drag(Location(200,200), Location(201,900))
+        self.gui.drag(Location(200,200), Location(201,900))
         # this overshoots on y then goes back, not ideal!!
-        positions = [(200,200), (200, 270), (200, 340),(200, 410),(200, 480),
-                            (200, 550),(200, 620),(200, 690),(200, 760),(200, 830), (201,900)]
-        self.assertEquals(sorted(positions), sorted(backend.list_of_points))
-        self.assertTrue(backend.button_down_pressed)
-        self.assertTrue(backend.button_up_pressed)
+        positions = [(200, 200), (200, 250), (200, 300), (200, 350), 
+                        (200, 400), (200, 450), (200, 500), (200, 550), 
+                        (200, 600), (200, 650), (200, 700), (200, 750), 
+                        (200, 800), (200, 850), (201, 900), (201, 900)]
+        self.assertEquals(sorted(positions), sorted(self.backend.list_of_points))
+        self.assertTrue(self.backend.button_down_pressed)
+        self.assertTrue(self.backend.button_up_pressed)
 
     def test_mouse_drag_equal_dirs(self):
-        backend = GeistMouseBackend()
-        gui = GUI(backend)
-        gui.drag(Location(200,200), Location(400, 400))
-        positions = [(200,200),(235, 235), (270, 270), (305, 305), (340, 340), (400,400)]
-        self.assertEquals(sorted(positions), sorted(backend.list_of_points))
-        self.assertTrue(backend.button_down_pressed)
-        self.assertTrue(backend.button_up_pressed)
+        self.gui.drag(Location(200,200), Location(400, 400))
+        positions = [(200,200),(240,240), (280, 280), (320, 320), (360, 360), (400,400), (400,400)]
+        self.assertEquals(sorted(positions), sorted(self.backend.list_of_points))
+        self.assertTrue(self.backend.button_down_pressed)
+        self.assertTrue(self.backend.button_up_pressed)
 
     def test_mouse_drag_x_dir(self):
-        backend = GeistMouseBackend()
-        gui = GUI(backend)
-        gui.drag(Location(200,200), Location(0, 200))
-        positions = [(200,200),(130, 200), (60, 200), (0, 200)]
-        self.assertEquals(sorted(positions), sorted(backend.list_of_points))
-        self.assertTrue(backend.button_down_pressed)
-        self.assertTrue(backend.button_up_pressed)
+        self.gui.drag(Location(200,200), Location(0, 200))
+        positions = [(0, 200), (0, 200), (50, 200), (100, 200), (150, 200), (200, 200)]
+        self.assertEquals(sorted(positions), sorted(self.backend.list_of_points))
+        self.assertTrue(self.backend.button_down_pressed)
+        self.assertTrue(self.backend.button_up_pressed)
+        
+    def test_mouse_move_increment(self):
+        self.gui.drag(Location(200,200), Location(400, 400), mouse_move_increment=100)
+        positions = [(200,200), (300, 300), (400,400), (400,400)]
+        self.assertEquals(sorted(positions), sorted(self.backend.list_of_points))
+        self.assertTrue(self.backend.button_down_pressed)
+        self.assertTrue(self.backend.button_up_pressed)        
 
 
 replay_suite = unittest.TestLoader().loadTestsFromTestCase(TestMouseDrag)
