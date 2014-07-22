@@ -1,5 +1,5 @@
 import numpy as np
-from ..core import Location, LocationList
+from ..finders import Location, LocationList
 
 
 class GeistFakeBackend(object):
@@ -46,6 +46,9 @@ class GeistFakeBackend(object):
 
     def move(self, point):
         pass
+
+    def cursor_position(self):
+        return 0, 0
 
     def close(self):
         pass

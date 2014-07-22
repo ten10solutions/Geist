@@ -7,7 +7,8 @@ import StringIO
 import wrapt
 from PIL import Image
 from . import get_platform_backend
-from ..core import GUI, Location, LocationList
+from ..core import GUI
+from ..finders import Location, LocationList
 from ._common import BackendActionBuilder
 import numpy
 import logging
@@ -94,7 +95,8 @@ class _ActionsTransaction(object):
         self._actions_builder.execute()
         return False
 
-_FORMAT_VERSION = [0,1]
+_FORMAT_VERSION = [0, 1]
+
 
 class PlaybackBackend(object):
     def __init__(self, recording_filename='backend_recording.log'):

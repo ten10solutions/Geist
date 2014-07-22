@@ -431,16 +431,20 @@ def grey_scale(image):
 
 
 def find_edges(image):
-    """Find edges and remove areas on solid colour
-
-    :param image: input image
-    :type image: single channel 2d :class:`numpy.ndarray`
-    :rtype: :class:`numpy.ndarray`
-    """
-    return numpy.abs((image[1:, :-1].astype(numpy.int16) - image[1:, 1:]) |
-                     (image[:-1, 1:].astype(numpy.int16) - image[1:, 1:]))
-
-edge_enhance = find_edges
+    base = image[:, :, numpy.newaxis].astype(numpy.int16)
+    c = base[1:-1, 1:-1]
+    e = base[1:-1, :-2]
+    w = base[1:-1, 2:]
+    s = base[:-2, 1:-1]
+    n = base[2:, 1:-1]
+    diffs = numpy.concatenate([c-e, c-w, c-s, c-n], axis=2).max(axis=2)
+    diffs[diffs < 0] = 0
+    dh, dw = diffs.shape
+    col = numpy.zeros((dh, 1), numpy.uint8)
+    row = numpy.zeros((1, dw+2), numpy.uint8)
+    return numpy.vstack(
+        (row, numpy.hstack((col, diffs.astype(numpy.uint8), col)), row)
+    )
 
 
 def find_threshold_near_density(img, density, low=0, high=255):

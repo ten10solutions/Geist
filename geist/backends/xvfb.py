@@ -8,7 +8,7 @@ import shutil
 import struct
 from . import logger
 from ._x11_common import GeistXBase
-from ..core import Location, LocationList
+from ..finders import Location, LocationList
 
 
 XVFB_PATH = '/var/tmp/Xvfb_display%d'
@@ -98,7 +98,7 @@ class GeistXvfbBackend(GeistXBase):
     def close(self):
         GeistXBase.close(self)
         if hasattr(self, '_xvfb_proc'):
-            logger.info("closing geist xvfb")
             self._xvfb_proc.kill()
-            shutil.rmtree(self._display_dir, ignore_errors=True)
+            self._xvfb_proc.wait()
+            shutil.rmtree(self._display_dir, ignore_errors=False)
             del self._xvfb_proc

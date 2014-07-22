@@ -113,6 +113,10 @@ class GeistXBase(object):
                 rootY=y,
             )
 
+    def cursor_position(self):
+        reply = self._root.query_pointer().reply()
+        return reply.root_x, reply.root_y
+
     def close(self):
         if hasattr(self, '_conn'):
             self._conn.disconnect()
