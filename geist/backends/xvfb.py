@@ -1,5 +1,6 @@
 from __future__ import division, absolute_import, print_function
 
+import atexit
 import numpy
 import subprocess
 import time
@@ -82,6 +83,9 @@ class GeistXvfbBackend(GeistXBase):
         self._xwd_reader = XwdToNumpyReader(fb_filepath)
         logger.info("Started Xvfb with file in %s", self._display_dir)
 
+        # Close everything when we exit
+        atexit.register(self.close)
+
     def _find_display(self):
         """
         Find a usable display, which doesn't have an existing Xvfb file
@@ -98,6 +102,7 @@ class GeistXvfbBackend(GeistXBase):
     def close(self):
         GeistXBase.close(self)
         if hasattr(self, '_xvfb_proc'):
+            logger.info("Closing Geist xvfb")
             self._xvfb_proc.kill()
             self._xvfb_proc.wait()
             shutil.rmtree(self._display_dir, ignore_errors=False)
