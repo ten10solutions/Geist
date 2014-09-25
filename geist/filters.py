@@ -13,11 +13,8 @@ class BinaryFractionFilter(BaseFinder):
 
     def find(self, in_location):
         for loc in self.finder.find(in_location):
-            print loc
             binary = self.binaryfier(loc.image)
             fraction = np.count_nonzero(binary) / binary.size
-            print np.count_nonzero(binary)
-            print binary.size
             if fraction > self.threshold:
                 yield loc
 
