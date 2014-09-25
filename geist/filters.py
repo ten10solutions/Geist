@@ -1,10 +1,11 @@
+from __future__ import division
 from itertools import islice
 import numpy as np
 
 from .finders import BaseFinder
 
 
-class BinaryFractionFilter(object):
+class BinaryFractionFilter(BaseFinder):
     def __init__(self, finder, binaryfier, fraction):
         self.finder = finder
         self.binaryfier = binaryfier
@@ -12,8 +13,11 @@ class BinaryFractionFilter(object):
 
     def find(self, in_location):
         for loc in self.finder.find(in_location):
+            print loc
             binary = self.binaryfier(loc.image)
             fraction = np.count_nonzero(binary) / binary.size
+            print np.count_nonzero(binary)
+            print binary.size
             if fraction > self.threshold:
                 yield loc
 
