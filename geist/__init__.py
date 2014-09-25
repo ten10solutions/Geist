@@ -31,9 +31,12 @@ from .repo import (
 )
 
 from .core import (
-    Location,
     NotFoundError,
     GUI,
+)
+
+from .finders import (
+    Location,
     LocationList,
 )
 
@@ -45,6 +48,11 @@ from .filters import (
     right_most,
     top_most,
     bottom_most
+)
+from .keyboard import (
+    KeyUp,
+    KeyDown,
+    KeyPress
 )
 
 from .backends import get_platform_backend

@@ -1,9 +1,9 @@
 from __future__ import division, absolute_import, print_function
-from .core import Location
 from itertools import groupby
+from .finders import Location, BaseFinder
 
 
-class FinderInFinder(object):
+class FinderInFinder(BaseFinder):
     def __init__(self, finder, in_finder):
         self._finder = finder
         self._in_finder = in_finder
@@ -20,7 +20,7 @@ class FinderInFinder(object):
         )
 
 
-class LocationOperatorFinder(object):
+class LocationOperatorFinder(BaseFinder):
     def __init__(self, a_finder, operator, b_finder):
         self._operator = operator
         self._a_finder = a_finder
@@ -146,7 +146,7 @@ intersects = row_aligned & column_aligned
 not_intersects = ~intersects
 
 
-class MergeLocationsFinderFilter(object):
+class MergeLocationsFinderFilter(BaseFinder):
     def __init__(self, op, finder):
         self.op = op
         self.finder = finder
