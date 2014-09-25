@@ -1,4 +1,31 @@
 from itertools import islice
+import numpy as np
+
+
+class BinaryFractionFilter(object):
+    def __init__(self, finder, binaryfier, fraction):
+        self.finder = finder
+        self.binaryfier = binaryfier
+        self.threshold = fraction
+
+    def find(self, in_location):
+        for loc in self.finder.find(in_location):
+            binary = self.binaryfier(loc.image)
+            fraction = np.count_nonzero(binary) / binary.size
+            if fraction > self.threshold:
+                yield loc
+
+    def __eq__(self, other):
+        if self.finder != other.finder:
+            return False
+        if self.binaryfier != other.binaryfier:
+            return False
+        if self.threshold != other.threshold:
+            return False
+        return True
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
 
 class LocationFinderFilter(object):
