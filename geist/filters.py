@@ -1,10 +1,11 @@
+from __future__ import division
 from itertools import islice
 import numpy as np
 
 from .finders import BaseFinder
 
 
-class BinaryFractionFilter(object):
+class BinaryFractionFilter(BaseFinder):
     def __init__(self, finder, binaryfier, fraction):
         self.finder = finder
         self.binaryfier = binaryfier
