@@ -57,7 +57,7 @@ class GeistXvfbBackend(GeistXBase):
 
         display = ":%d" % (self.display_num, )
         self._display_dir = XVFB_PATH % (self.display_num,)
-        os.makedirs(self._display_dir, 0700)
+        os.makedirs(self._display_dir, 0o700)
         dev_null = open('/dev/null', 'w')
         self._xvfb_proc = subprocess.Popen(
             [

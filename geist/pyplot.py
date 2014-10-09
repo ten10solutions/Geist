@@ -68,7 +68,6 @@ class Viewer(object):
         smax = sat.max()
         vmin = val.min()
         vmax = val.max()
-        print hmin, hmax, smin, smax, vmin, vmax
         return hsv(lambda h, s, v: (
             (h >= hmin) & (h <= hmax)) &
             ((s >= smin) & (s <= smax)) &
