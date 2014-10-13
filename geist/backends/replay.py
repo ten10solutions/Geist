@@ -119,7 +119,7 @@ class PlaybackBackend(object):
         location_list = LocationList()
         for b64_location in b64_locations:
             base64_png = b64_location['base64_png']
-            string_file = StringIO.StringIO(
+            string_file = StringIO(
                 base64.b64decode(base64_png)
             )
             x, y, w, h = (
@@ -191,7 +191,7 @@ class RecordingBackend(object):
     def _write_capture_locations(self, locations):
         b64_locations = []
         for location in locations:
-            string_file = StringIO.StringIO()
+            string_file = StringIO()
             Image.fromarray(location.image).save(string_file, 'png')
             b64_png = base64.b64encode(string_file.getvalue())
             b64_locations.append({
