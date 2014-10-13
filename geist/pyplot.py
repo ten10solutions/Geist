@@ -40,7 +40,7 @@ class Viewer(object):
 
     def show_capture(self, wait_time=0):
         sleep(wait_time)
-        for location in self._gui.capture_locations(wait_time):
+        for location in self._gui.capture_locations():
             figure()
             imshow(location.image, interpolation='none')
 
