@@ -40,3 +40,10 @@ nosetests.xml
 
 # git
 *.orig
+
+# pycharm
+.idea*
+
+# rmv stuff
+geist/data/*
+test_repo/*
