@@ -202,6 +202,8 @@ class _KeyBoard(object):
         'backslash': '\\',
         'underscore': '_',
         'exclam': '!',
+        'fslash': '/',
+        'greaterthan':'>',
     }
 
     def _convert_keyname_to_virtual_key(self, name):
