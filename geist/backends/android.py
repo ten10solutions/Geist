@@ -7,7 +7,20 @@ import struct
 import subprocess
 import zlib
 from ..finders import Location, LocationList
+from ._common import BackendActionBuilder
 from . import logger
+
+
+class _ActionsTransaction(object):
+    def __init__(self, backend):
+        self._actions_builder = BackendActionBuilder(backend)
+
+    def __enter__(self):
+        return self._actions_builder
+
+    def __exit__(self, *args):
+        self._actions_builder.execute()
+        return False
 
 
 class AndroidToNumpyReader(object):
@@ -55,6 +68,9 @@ class GeistAndroidBackend(object):
             device = self._devices.get_first_device()
         return device if device else None
 
+    def actions_transaction(self):
+        return _ActionsTransaction(self)
+
     def capture_locations(self, device_id=None):
         _stream = self.do_screencap(device_id)
         if not _stream:
@@ -88,18 +104,36 @@ class GeistAndroidBackend(object):
             return None
         return actions.clickimage(device, px, py)
 
-    def swipe(self):
-        pass
-        # TODO implement swipe
-        # return actions.swipeimage(self.get_device(), json_data, time)
+    def swipe(self, json_data, device_id=None, time=None):
+        device = self.get_device(device_id)
+        if not device:
+            return None
+        return actions.swipeimage(device, json_data, time)
 
-    def press_button(self):
-        pass
-        # TODO implement button
-        # return actions.button(self.get_device(), button)
+    def press_button(self, button, device_id=None):
+        device = self.get_device(device_id)
+        if not device:
+            return None
+        return actions.button(device, button)
 
     def getrotation(self, device_id=None):
         device = self.get_device(device_id)
         if not device:
             return None
         return actions.getrotation(device)
+
+    def button_down(self, button_num):
+        pass
+
+    def button_up(self, button_num):
+        pass
+
+    def move(self, point):
+        x, y = point
+        self.click(x, y)
+
+    def close(self):
+        pass
+
+    def __del__(self):
+        self.close()
