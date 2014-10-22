@@ -11,7 +11,6 @@ from ..finders import Location, LocationList
 from ._common import BackendActionBuilder
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 
 class _ActionsTransaction(object):
