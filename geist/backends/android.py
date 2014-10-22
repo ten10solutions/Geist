@@ -2,13 +2,16 @@ from __future__ import division, absolute_import, print_function
 
 import androidwebui.device_store as device_store
 import androidwebui.actions as actions
+import logging
 import numpy as np
 import struct
 import subprocess
 import zlib
 from ..finders import Location, LocationList
 from ._common import BackendActionBuilder
-from . import logger
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 class _ActionsTransaction(object):
