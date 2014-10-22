@@ -20,6 +20,15 @@ def go_home():
         backend.press_button("home")
         max_presses -= 1
 
+
+def write_geist():
+    backend.swipe(json.dumps(left_swipe))
+    backend.swipe(json.dumps(left_swipe))
+    gui.click(approx_finder.drawingapp)
+    backend.click(660, 50)
+    backend.swipe(json.dumps(geist_text))
+    backend.click(560, 50)
+
 repo = DirectoryRepo('test_repo')
 backend = GeistAndroidBackend()
 gui = GUI(backend)
@@ -38,13 +47,13 @@ approx_finder = TemplateFinderFromRepo(repo, ApproxTemplateFinder)
 exact_finder = TemplateFinderFromRepo(repo, ExactTemplateFinder)
 
 left_swipe = [
-    {"startx": 110, "starty": 1066, "endx": 676, "endy": 1129},
+    {"startx": 100, "starty": 1100, "endx": 700, "endy": 1100},
 ]
-backend.swipe(json.dumps(left_swipe))
-backend.swipe(json.dumps(left_swipe))
-gui.click(approx_finder.kidspaint)
+right_swipe = [
+    {"startx": 700, "starty": 1100, "endx": 100, "endy": 1100},
+]
 
-write_geist = [
+geist_text = [
     {"startx": 268, "starty": 476, "endx": 266, "endy": 474},
     {"startx": 178, "starty": 344, "endx": 170, "endy": 308},
     {"startx": 172, "starty": 306, "endx": 138, "endy": 282},
@@ -75,4 +84,3 @@ write_geist = [
     {"startx": 460, "starty": 238, "endx": 476, "endy": 594},
     {"startx": 412, "starty": 346, "endx": 490, "endy": 322},
 ]
-backend.swipe(json.dumps(write_geist))
