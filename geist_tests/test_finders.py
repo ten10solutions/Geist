@@ -18,3 +18,11 @@ class TestLocationFinderFilter(unittest.TestCase):
         result = self.gui.wait_find_one(finder)
         self.assertEqual(parent_x + child_x, result.x)
         self.assertEqual(parent_y + child_y, result.y)
+
+
+location_finder_filter_suite = unittest.TestLoader().loadTestsFromTestCase(
+    TestLocationFinderFilter)
+all_tests = unittest.TestSuite([location_finder_filter_suite])
+if __name__ == "__main__":
+    runner = unittest.TextTestRunner(verbosity=1)
+    runner.run(all_tests)
