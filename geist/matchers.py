@@ -1,6 +1,7 @@
 from .match_position_finder_helpers import get_tiles_at_potential_match_regions, normalise_correlation, normalise_correlation_coefficient
 from scipy.signal import fftconvolve
 from scipy.ndimage.measurements import label, find_objects
+import numpy as np
 
 # both these methods return array of points giving bottom right coordinate of match
 
