@@ -1,4 +1,5 @@
 from itertools import cycle
+from time import sleep
 from matplotlib.pyplot import cm, figure, gcf, imshow
 from geist.colour import rgb_to_hsv, hsv
 from geist.finders import Location
@@ -37,7 +38,8 @@ class Viewer(object):
         y2 = int(numpy.ceil(y2 + 0.5))
         return Location(x1, y1, x2 - x1, y2 - y1, image=numpy.array(a.get_images()[-1].get_array()))
 
-    def show_capture(self):
+    def show_capture(self, wait_time=0):
+        sleep(wait_time)
         for location in self._gui.capture_locations():
             figure()
             imshow(location.image, interpolation='none')
