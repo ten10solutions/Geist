@@ -9,8 +9,12 @@ def match_via_correlation(image, template, raw_tolerance=1, normed_tolerance=0.9
     """ Matchihng algorithm based on normalised cross correlation.
         Using this matching prevents false positives occuring for bright patches in the image
     """
+    h, w = image.shape
+    th, tw = template.shape
     # fft based convolution enables fast matching of large images
     correlation = fftconvolve(image, template[::-1,::-1])
+    # trim the returned image, fftconvolve returns an image of width: (Temp_w-1) + Im_w + T(emp_w -1), likewise height
+    correlation = correlation[th-1:h, tw-1:w]
     # find images regions which are potentially matches
     match_position_dict = get_tiles_at_potential_match_regions(image, template, correlation, raw_tolerance=raw_tolerance)
     # bright spots in images can lead to false positivies- the normalisation carried out here eliminates those
@@ -27,9 +31,12 @@ def match_via_correlation_coefficient(image, template, raw_tolerance=1, normed_t
 
         From experimentation, this method is less prone to false positives than the correlation method.
     """
+    h, w = image.shape
+    th, tw = template.shape
     temp_mean = np.mean(template)
     temp_minus_mean = template - temp_mean
     convolution = fftconvolve(image, temp_minus_mean[::-1,::-1])
+    convolution = convolution[th-1:h, tw-1:w]
     match_position_dict = get_tiles_at_potential_match_regions(image, template, convolution, method='correlation coefficient', raw_tolerance=raw_tolerance)
     # this is empty, so think condition is wrong
     results = normalise_correlation_coefficient(match_position_dict, convolution, template, normed_tolerance=normed_tolerance)
@@ -43,7 +50,7 @@ def fuzzy_match(image, template, normed_tolerance=None, raw_tolerance=None, meth
        the bottom right corners of the matches.
        Fuzzy matches returns regions, so the center of each region is returned as the final match location
 
-       USE THIS METHOD IF you need to match, e.g. the same image but rendered slightly different with respect to
+       USE THIS FUNCTION IF you need to match, e.g. the same image but rendered slightly different with respect to
        anti aliasing; the same image on a number of different backgrounds.
 
        The raw_tolerance is the proportion of the value at match positions (i.e. the value returned for an exact match)
@@ -71,7 +78,7 @@ def fuzzy_match(image, template, normed_tolerance=None, raw_tolerance=None, meth
         results = np.array(match_via_correlation_coefficient(image, template, raw_tolerance=raw_tolerance, normed_tolerance=normed_tolerance))
     h, w = image.shape
     th, tw = template.shape
-    results = np.array([[result[0], result[1]] for result in results if (th < result[0] < h and tw < result[1] < w)])
+    results = np.array([(result[0] + th -1, result[1] + tw -1) for result in results])
     #match_x, match_y = int(np.mean(results[:,1])), int(np.mean(results[:,0]))
     results_aggregated_mean_match_position = match_positions((h,w), results)
     return results_aggregated_mean_match_position

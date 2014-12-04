@@ -28,15 +28,9 @@ def find_potential_match_regions(template, transformed_array, method='correlatio
 def get_tiles_at_potential_match_regions(image, template, transformed_array, method='correlation', raw_tolerance=0.001):
     if method not in ['correlation', 'correlation coefficient', 'squared difference']:
         raise ValueError('Matching method not implemented')
-    match_points = find_potential_match_regions(template, transformed_array, method=method, raw_tolerance=raw_tolerance)
     h, w = template.shape
-    # now only need to get tiles and normalisation coefficients at these positions
-    if method in 'correlation':
-        # BUG HERE!! gets negative values
-        match_points = [(match[0]-h+1, match[1] - w +1) for match in match_points]
-    else:
-        match_points = [(match[0], match[1]) for match in match_points]
-    match_point_dict = {i:point for (i, point) in enumerate(match_points)}
+    match_points = find_potential_match_regions(template, transformed_array, method=method, raw_tolerance=raw_tolerance)
+    match_points = [(match[0], match[1]) for match in match_points]
     # create tile for each match point- use dict so we know which match point it applies to
     # match point here is position of top left pixel of tile
     image_tiles_dict = {match_points[i]:image[match_points[i][0]:match_points[i][0]+h,match_points[i][1]:match_points[i][1]+w] for i in range(len(match_points))}
@@ -57,8 +51,8 @@ def normalise_correlation(image_tile_dict, transformed_array, template, normed_t
     match_points = image_tile_dict.keys()
     # for correlation, then need to transofrm back to get correct value for division
     h, w = template.shape
-    points_from_transformed_array = [(match[0] + h - 1, match[1] + w - 1) for match in match_points]
-    image_matches_normalised = {points_from_transformed_array[i]:transformed_array[points_from_transformed_array[i][0], points_from_transformed_array[i][1]]/image_norms[match_points[i]] for i in range(len(match_points))}
+    #points_from_transformed_array = [(match[0] + h - 1, match[1] + w - 1) for match in match_points]
+    image_matches_normalised = {match_points[i]:transformed_array[match_points[i][0], match_points[i][1]]/image_norms[match_points[i]] for i in range(len(match_points))}
     result = {key:value for key, value in image_matches_normalised.items() if np.round(value, decimals=3) >= normed_tolerance}
     return result.keys()
 
