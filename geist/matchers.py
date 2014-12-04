@@ -13,7 +13,7 @@ def match_via_correlation(image, template, raw_tolerance=1, normed_tolerance=0.9
     th, tw = template.shape
     # fft based convolution enables fast matching of large images
     correlation = fftconvolve(image, template[::-1,::-1])
-    # trim the returned image, fftconvolve returns an image of width: (Temp_w-1) + Im_w + T(emp_w -1), likewise height
+    # trim the returned image, fftconvolve returns an image of width: (Temp_w-1) + Im_w + (Temp_w -1), likewise height
     correlation = correlation[th-1:h, tw-1:w]
     # find images regions which are potentially matches
     match_position_dict = get_tiles_at_potential_match_regions(image, template, correlation, raw_tolerance=raw_tolerance)
@@ -52,6 +52,10 @@ def fuzzy_match(image, template, normed_tolerance=None, raw_tolerance=None, meth
 
        USE THIS FUNCTION IF you need to match, e.g. the same image but rendered slightly different with respect to
        anti aliasing; the same image on a number of different backgrounds.
+
+       The method is the name of the matching method used, the details of this do not matter. Use the default method
+       unless you have too many false positives, in this case, use the method 'correlation coefficient.' The
+       correlation coefficient method can also be more robust at matching when the match might not be exact.
 
        The raw_tolerance is the proportion of the value at match positions (i.e. the value returned for an exact match)
        that we count as a match. For fuzzy matching, this value will not be exactly the value returned for an exact match
