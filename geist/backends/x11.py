@@ -10,7 +10,8 @@ from operator import attrgetter
 from geist.core import Location, LocationList
 from ._x11_common import GeistXBase
 from . import logger
-
+import pyscreenshot as ImageGrab
+import numpy as np
 
 xproto.mixin()
 
@@ -32,20 +33,5 @@ class GeistXBackend(GeistXBase):
     def capture_locations(self):
         geometry_getter = attrgetter('x', 'y', 'width', 'height')
         x, y, w, h = geometry_getter(self._root.get_geometry().reply())
-        raw_img = self._root.get_image(
-            xproto.ImageFormat.XYPixmap,
-            x,
-            y,
-            w,
-            h,
-            0xFFFFFFFF
-        ).reply().data
-        im = numpy.unpackbits(
-            numpy.array(raw_img, numpy.uint8).reshape(3, 8, h, w // 8, 1),
-            4
-        )[:, :, :, :, ::-1].reshape(3, 8, h, w)
-        res = numpy.zeros((h, w, 3), numpy.uint8)
-        res[:, :, 0] = _bit_c_to_byte(im[0])
-        res[:, :, 1] = _bit_c_to_byte(im[1])
-        res[:, :, 2] = _bit_c_to_byte(im[2])
+        res = np.array(ImageGrab.grab())
         return LocationList([Location(x, y, w, h, image=res)])
