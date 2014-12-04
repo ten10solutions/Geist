@@ -73,3 +73,22 @@ def normalise_correlation_coefficient(image_tile_dict, transformed_array, templa
     return normalised_matches.keys()
 
 
+
+def calculate_squared_differences(image_tile_dict, transformed_array, template, sq_diff_tolerance=0.1):
+    """As above, but for when the squared differences matching method is used
+    """
+    template_norm_squared = np.sum(template**2)
+    image_norms_squared = {(x,y):np.sum(image_tile_dict[(x,y)]**2) for (x,y) in image_tile_dict.keys()}
+    match_points = image_tile_dict.keys()
+    # for correlation, then need to transofrm back to get correct value for division
+    h, w = template.shape
+    image_matches_normalised = {match_points[i]:-2*transformed_array[match_points[i][0], match_points[i][1]] + image_norms_squared[match_points[i]] + template_norm_squared for i in range(len(match_points))}
+    #print image_matches_normalised
+    cutoff = h*w*255**2*sq_diff_tolerance
+    normalised_matches = {key:value for key, value in image_matches_normalised.items() if np.round(value, decimals=3) <= cutoff}
+    return normalised_matches.keys()
+
+
+
+
+

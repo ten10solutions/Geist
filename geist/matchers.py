@@ -22,6 +22,22 @@ def match_via_correlation(image, template, raw_tolerance=1, normed_tolerance=0.9
     return results
 
 
+def match_via_squared_difference(image, template, raw_tolerance=1, sq_diff_tolerance=0.1):
+    """ Matchihng algorithm based on normalised cross correlation.
+        Using this matching prevents false positives occuring for bright patches in the image
+    """
+    h, w = image.shape
+    th, tw = template.shape
+    # fft based convolution enables fast matching of large images
+    correlation = fftconvolve(image, template[::-1,::-1])
+    # trim the returned image, fftconvolve returns an image of width: (Temp_w-1) + Im_w + (Temp_w -1), likewise height
+    correlation = correlation[th-1:h, tw-1:w]
+    # find images regions which are potentially matches
+    match_position_dict = get_tiles_at_potential_match_regions(image, template, correlation, raw_tolerance=raw_tolerance)
+    # bright spots in images can lead to false positivies- the normalisation carried out here eliminates those
+    results = calculate_squared_differences(match_position_dict, correlation, template, sq_diff_tolerance=sq_diff_tolerance)
+    return results
+
 
 
 def match_via_correlation_coefficient(image, template, raw_tolerance=1, normed_tolerance=0.9):
@@ -80,6 +96,12 @@ def fuzzy_match(image, template, normed_tolerance=None, raw_tolerance=None, meth
         if not normed_tolerance:
             normed_tolerance = 0.9
         results = np.array(match_via_correlation_coefficient(image, template, raw_tolerance=raw_tolerance, normed_tolerance=normed_tolerance))
+    elif method == 'squared difference':
+        if not raw_tolerance:
+            raw_tolerance = 0.8
+        if not normed_tolerance:
+            normed_tolerance = 0.1
+        results = np.array(match_via_squared_difference(image, template, raw_tolerance=raw_tolerance, sq_diff_tolerance=normed_tolerance))
     h, w = image.shape
     th, tw = template.shape
     results = np.array([(result[0] + th -1, result[1] + tw -1) for result in results])
@@ -87,7 +109,6 @@ def fuzzy_match(image, template, normed_tolerance=None, raw_tolerance=None, meth
     results_aggregated_mean_match_position = match_positions((h,w), results)
     return results_aggregated_mean_match_position
 
-    #return results
 
 
 def match_positions(shape, list_of_coords):
