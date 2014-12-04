@@ -12,6 +12,8 @@ from ._x11_common import GeistXBase
 from . import logger
 import pyscreenshot as ImageGrab
 import numpy as np
+import subprocess
+from PIL import Image
 
 xproto.mixin()
 
@@ -33,5 +35,9 @@ class GeistXBackend(GeistXBase):
     def capture_locations(self):
         geometry_getter = attrgetter('x', 'y', 'width', 'height')
         x, y, w, h = geometry_getter(self._root.get_geometry().reply())
-        res = np.array(ImageGrab.grab())
+        #res = np.array(ImageGrab.grab())
+        subprocess.Popen("import -window root screenshot.png", shell=True)
+        res = np.array(Image.open('screenshot.png'))
+        # remove once we have loaded the image as a numpy array
+        subprocess.Popen("rm screenshot.png",shell=True)
         return LocationList([Location(x, y, w, h, image=res)])
