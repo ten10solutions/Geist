@@ -11,6 +11,9 @@ class BaseFinder(object):
         raise NotImplemented(
             "find should be implemented in the inherited class")
 
+    def find_list(self, in_location, **kwargs):
+        return list(self.find(in_location, **kwargs))
+
 
 class Location(BaseFinder):
     def __init__(self, rel_x, rel_y, w=1, h=1, main_point_offset=None,
