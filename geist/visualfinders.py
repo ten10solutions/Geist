@@ -76,6 +76,7 @@ class ApproxTemplateFinder(BaseFinder):
         bin_image = edge_image > 10
         bin_template = edge_template > 10
         for x, y in best_convolution(bin_template, bin_image):
+            #print("x=%d, y=%d, in_location=%r" % (x,y,in_location))
             yield Location(x, y, w, h, parent=in_location)
 
     def __repr__(self):
@@ -88,15 +89,24 @@ class FuzzyTemplateFinder(BaseFinder):
         They are thus more robust to slight variations in rendering,
 
     """
-    def __init__(self, template):
+    def __init__(self, template, normed_tolerance=None, raw_tolerance=None):
         self.template = template
+        self.normed_tolerance = normed_tolerance
+        self.raw_tolerance = raw_tolerance
 
     def find(self, in_location, normed_tolerance=None, raw_tolerance=None, method='correlation'):
         h, w = self.template.image.shape[:2]
         image = in_location.image
         gimage = grey_scale(image)
         gtemplate = grey_scale(self.template.image)
+        
+        if normed_tolerance is None:
+            normed_tolerance = self.normed_tolerance
+        if raw_tolerance is None:
+            raw_tolerance = self.raw_tolerance
+
         for x, y in fuzzy_match(gimage, gtemplate, normed_tolerance=normed_tolerance, raw_tolerance=raw_tolerance, method=method):
+            #print("x=%d, y=%d, in_location=%r" % (x,y,in_location))
             yield Location(x, y, w, h, parent=in_location)
 
     def __repr__(self):

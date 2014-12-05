@@ -1,4 +1,4 @@
-from .match_position_finder_helpers import get_tiles_at_potential_match_regions, normalise_correlation, normalise_correlation_coefficient
+from .match_position_finder_helpers import get_tiles_at_potential_match_regions, normalise_correlation, normalise_correlation_coefficient, find_potential_match_regions
 from scipy.signal import fftconvolve
 from scipy.ndimage.measurements import label, find_objects
 import numpy as np
@@ -86,25 +86,25 @@ def fuzzy_match(image, template, normed_tolerance=None, raw_tolerance=None, meth
     """
     if method == 'correlation':
         if not raw_tolerance:
-            raw_tolerance = 0.85
+            raw_tolerance = 0.95
         if not normed_tolerance:
-            normed_tolerance = 0.85
+            normed_tolerance = 0.95
         results = np.array(match_via_correlation(image, template, raw_tolerance=raw_tolerance, normed_tolerance=normed_tolerance))
     elif method == 'correlation coefficient':
         if not raw_tolerance:
-            raw_tolerance = 0.8
+            raw_tolerance = 0.95
         if not normed_tolerance:
-            normed_tolerance = 0.9
+            normed_tolerance = 0.95
         results = np.array(match_via_correlation_coefficient(image, template, raw_tolerance=raw_tolerance, normed_tolerance=normed_tolerance))
     elif method == 'squared difference':
         if not raw_tolerance:
-            raw_tolerance = 0.8
+            raw_tolerance = 0.95
         if not normed_tolerance:
-            normed_tolerance = 0.1
+            normed_tolerance = 0.05
         results = np.array(match_via_squared_difference(image, template, raw_tolerance=raw_tolerance, sq_diff_tolerance=normed_tolerance))
     h, w = image.shape
     th, tw = template.shape
-    results = np.array([(result[0] + th -1, result[1] + tw -1) for result in results])
+    results = np.array([(result[0], result[1]) for result in results])
     #match_x, match_y = int(np.mean(results[:,1])), int(np.mean(results[:,0]))
     results_aggregated_mean_match_position = match_positions((h,w), results)
     return results_aggregated_mean_match_position
@@ -122,7 +122,7 @@ def match_positions(shape, list_of_coords):
         labelled = label(match_array)
         objects = find_objects(labelled[0])
         coords = [{'x':(slice_x.start, slice_x.stop),'y':(slice_y.start, slice_y.stop)} for (slice_y,slice_x) in objects]
-        final_positions = [(int(np.mean(coords[i]['y'])),int(np.mean(coords[i]['x']))) for i in range(len(coords))]
+        final_positions = [(int(np.mean(coords[i]['x'])),int(np.mean(coords[i]['y']))) for i in range(len(coords))]
         return final_positions
     except IndexError:
         print 'no matches found'
@@ -146,10 +146,10 @@ def to_rgb(im):
     return np.dstack([im.astype(np.uint8)] * 3).copy(order='C')
 
 
-def highlight_matched_region_no_normalisation(image, template, method='correlation', normed_tolerance=0.666):
+def highlight_matched_region_no_normalisation(image, template, method='correlation', raw_tolerance=0.666):
     conv = fftconvolve(image, template[::-1,::-1])
     th, tw = template.shape
-    r = find_potential_match_regions(template, conv, method=method, normed_tolerance=normed_tolerance)
+    r = find_potential_match_regions(template, conv, method=method, raw_tolerance=raw_tolerance)
     r_in_image = [(r_x, r_y) for (r_x, r_y) in r if (r_x < image.shape[0] and r_y < image.shape[1])]
     im_rgb = to_rgb(image)
     for (x,y) in r_in_image:
