@@ -56,3 +56,5 @@ from .keyboard import (
 )
 
 from .backends import get_platform_backend
+
+from .version import __version__

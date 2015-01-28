@@ -3,7 +3,8 @@
 from setuptools import setup
 import os
 
-with open(os.path.join('geist','version.py')) as f:
+__version__ = None  # quiet linters
+with open(os.path.join('geist', 'version.py')) as f:
     exec(f.read())
 
 
