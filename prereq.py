@@ -20,7 +20,7 @@ from geist import (
 from geist.pyplot import Viewer
 
 # Mark the directory listed as the current image repository
-repo = DirectoryRepo(repo_location)
+repo = DirectoryRepo("C:\some_filepath") # <--------------- EDIT ME!!!!!!!!!!!!!!!
 
 # Start a Geist backend, takes an optional screen number to capture.
 backend = get_platform_backend()
