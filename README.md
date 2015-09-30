@@ -117,7 +117,7 @@ colour = viewer.get_colour()
 Some additional information on Geist can be found [here] (https://github.com/thetestpeople/Geist).
 
 Creating Geist Finders
-----------------
+======================
 
 Geist locates things based on finders. A finder will either return a Location object, or a collection of
 location objects. A location object is an area of the screen. It has an image attribute as well as
@@ -242,4 +242,25 @@ viewer.show_found(SliceFinderFilter(sorted_blue_things_small)[0])
 
 # Blue things with width that are 2nd-5th largest of the overall result set.
 viewer.show_found(SliceFinderFilter(sorted_blue_things_large)[1:4])
+```
+
+### Finding things inside other things
+
+To try to find objects inside a Location that you've already found. Use the FinderInFinder.
+
+```python
+from geist import FinderInFinder
+
+viewer.show_found(FinderInFinder(approx_finder.find_this, approx_finder.inside_this))
+```
+
+### Combining Finders
+
+To combine the results of finders, use the MultipleFinderFinder. This can take as many finders as you
+would like to combine.
+
+```python
+from geist import MultipleFinderFinder
+
+viewer.show_found(MultipleFinderFinder(approx_finder.saved_image_1, approx_finder.saved_image2))
 ```
