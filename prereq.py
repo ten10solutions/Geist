@@ -29,4 +29,4 @@ backend = get_platform_backend()
 gui = GUI(backend)
 
 # Viewer  object can be used to display results in image form
-viewer = Viewer(login_page.gui, login_page.repo)
+viewer = Viewer(gui, repo)
