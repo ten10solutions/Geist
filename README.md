@@ -140,8 +140,8 @@ approx_finder = TemplateFinderFromRepo(repo, ApproxTemplateFinder)
 exact_finder = TemplateFinderFromRepo(repo, ExactTemplateFinder)
 threshold_finder = TemplateFinderFromRepo(
     repo,
-    lambda template: ThresholdTemplateFinder(template, threshold_integer)
-    )
+    lambda template: ThresholdTemplateFinder(template, threshold=threshold_integer)
+    ) # Replace threshold_integer with some integer value
 ```
 
 A saved image can be retrieved and used as a finder with the following syntax:
