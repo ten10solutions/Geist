@@ -1,4 +1,4 @@
- # want to build a function which finds out if any image in repository is 'similar' to existing image.
+# want to build a function which finds out if any image in repository is 'similar' to existing image.
 # use convolution
 from geist.vision import pad_bin_image_to_shape, grey_scale, find_edges
 import numpy
@@ -80,7 +80,7 @@ def find_similar_in_repo(template, repo, match_tolerance=1, size_tolerance=0.1):
     no_match = []
     for key in repo:
         image = repo[key].image
-        result = is_similar(template, image, match_tolerance=match_tolerance, size_tolerance=size_tolerance) 
+        result = is_similar(template, image, match_tolerance=match_tolerance, size_tolerance=size_tolerance)
         if result == True:
             similar.append(key)
         if result == "matches exist- size different":

@@ -29,10 +29,19 @@ class CouldDoBetterKeyboardLayout(object):
         '-': ('minus', False),
         ':': ('colon', True),
         '\\': ('backslash', False),
-        '_':('underscore', True),
-        '/':('fslash', False),
-        '>':('greaterthan', False),
-    }
+        '_': ('underscore', True),
+        '/': ('fslash', False),
+        '>': ('greaterthan', True),
+        '<': ('lessthan', True),
+        ',': ('comma', False),
+        '[': ('lsquarebracket', False),
+        ']': ('rsquarebracket', False),
+        '{': ('lcurlybracket', True),
+        '}': ('rcurlybracket', True),
+        '+': ('plus', True),
+        '=': ('equals', False),
+        '#': ('hash', False),
+        '?': ('questionmk', True)}
 
     def __call__(self, char):
         if char in CouldDoBetterKeyboardLayout.CHAR_TO_NAME_MAP:
