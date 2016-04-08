@@ -190,6 +190,7 @@ class _KeyBoard(object):
         'lshift': 0xA0,
         'rshift': 0xA1,
         'escape': 0x1B,
+        'backspace': 0x08
     }
 
     NAME_TO_CHAR_MAP = {
@@ -203,7 +204,17 @@ class _KeyBoard(object):
         'underscore': '_',
         'exclam': '!',
         'fslash': '/',
-        'greaterthan':'>',
+        'greaterthan': '>',
+        'lessthan': '<',
+        'comma': ',',
+        'lquarebracket': '[',
+        'rsquarebracket': ']',
+        'lcurlybracket': '{',
+        'rcurlybrqacket': '}',
+        'plus': '+',
+        'equals': '=',
+        'hash': '#',
+        'questionmk': '?'
     }
 
     def _convert_keyname_to_virtual_key(self, name):
