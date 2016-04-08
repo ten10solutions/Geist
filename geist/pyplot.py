@@ -44,7 +44,7 @@ class Viewer(object):
             figure()
             imshow(location.image, interpolation='none')
 
-    def show_repo(self, name, newfig=False):
+    def show_repo(self, name, newfig=True):
         if newfig:
             figure()
         imshow(self._repo[name].image, cm.Greys_r, interpolation='none')
